@@ -1,0 +1,19 @@
+{
+  "rules": {
+    ".read": false,
+    ".write": false,
+    "users": {
+      "$uid": {
+        ".read": "auth != null && auth.uid === $uid && auth.token.email_verified === true && auth.token.email.matches(/@ckarchitecture\\.com$/)",
+        ".write": "auth != null && auth.uid === $uid && auth.token.email_verified === true && auth.token.email.matches(/@ckarchitecture\\.com$/)",
+        "profile": { ".validate": "newData.hasChildren(['email'])" },
+        "tasks": { "$id": { ".validate": "newData.hasChildren(['name']) && newData.child('name').isString() && newData.child('name').val().length <= 300" } },
+        "log": { "$id": { ".validate": "newData.hasChildren(['date','task']) && newData.child('task').val().length <= 300 && (!newData.child('remarks').exists() || newData.child('remarks').val().length <= 2000)" } },
+        "todos": { "$id": { ".validate": "newData.hasChildren(['text']) && newData.child('text').val().length <= 500" } },
+        "lists": { ".validate": true },
+        "email": { ".write": false },
+        "$other": { ".validate": false }
+      }
+    }
+  }
+}
