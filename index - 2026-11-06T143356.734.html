@@ -1,0 +1,265 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Daily Task Tracker</title>
+<link rel="manifest" href="manifest.webmanifest"><meta name="theme-color" content="#1C3557"><link rel="icon" href="icon-192.png"><link rel="apple-touch-icon" href="icon-192.png"><meta name="apple-mobile-web-app-capable" content="yes">
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+:root{--bg:#F6F7F9;--panel:#fff;--ink:#26303D;--muted:#6B7685;--line:#E3E7ED;--navy:#1C3557;--gold:#C9A84C;--soft:#EEF2F7;--good:#2E8B6A;--warn:#C27C0E;--bad:#C0392B;color-scheme:light}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 "Segoe UI",system-ui,-apple-system,Arial,sans-serif}
+header{background:#fff;border-bottom:1px solid var(--line)}.hd{max-width:1100px;margin:0 auto;padding:12px 18px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.hd h1{font:400 21px Georgia,serif;color:var(--navy);margin:0}.hd .s{font-size:12.5px;color:var(--muted)}
+nav{max-width:1100px;margin:0 auto;padding:0 18px;display:flex;gap:2px;flex-wrap:wrap}nav button{font:inherit;border:none;background:none;padding:9px 14px;color:var(--muted);cursor:pointer;border-bottom:3px solid transparent}nav button.on{color:var(--navy);font-weight:600;border-bottom-color:var(--gold)}
+main{max-width:1100px;margin:0 auto;padding:18px}
+.card{background:#fff;border:1px solid var(--line);border-radius:12px;padding:16px 18px;margin-bottom:14px}
+h2{font-size:16.5px;color:var(--navy);margin:0 0 6px}.note{font-size:12.5px;color:var(--muted);margin:0 0 10px}
+.btn{font:inherit;padding:8px 14px;border-radius:8px;border:1px solid var(--line);background:#fff;color:var(--ink);cursor:pointer}.btn.p{background:var(--navy);color:#fff;border-color:var(--navy)}.btn.g{background:var(--gold);border-color:var(--gold);color:#1f1f1f}.btn:disabled{opacity:.5;cursor:default}
+.mic{width:84px;height:84px;border-radius:50%;border:none;background:var(--navy);color:#fff;font-size:34px;cursor:pointer;box-shadow:0 4px 14px rgba(28,53,87,.25)}.mic.rec{background:var(--bad);animation:pulse 1.2s infinite}@keyframes pulse{50%{box-shadow:0 0 0 14px rgba(192,57,43,.12)}}
+.vrow{display:flex;gap:18px;align-items:center;flex-wrap:wrap}
+textarea,input,select{font:inherit;padding:7px 10px;border:1px solid var(--line);border-radius:8px;background:#fff;color:var(--ink)}textarea{width:100%;min-height:74px}
+table{width:100%;border-collapse:collapse;font-size:13.5px}th{text-align:left;color:var(--navy);background:var(--soft);font-weight:600;padding:7px 9px;border-bottom:1px solid var(--line);white-space:nowrap}td{padding:6px 9px;border-bottom:1px solid var(--line);vertical-align:top}td.r,th.r{text-align:right}
+td input,td select{width:100%;padding:5px 7px}
+.pill{display:inline-block;padding:1px 9px;border-radius:10px;font-size:12px;font-weight:600;white-space:nowrap}.Completed{background:#E5F4EE;color:var(--good)}.InProgress{background:#E8EEF7;color:var(--navy)}.Delayed{background:#FBE7E5;color:var(--bad)}.NotStarted{background:#F1F3F6;color:var(--muted)}
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:14px}.tile{background:#fff;border:1px solid var(--line);border-top:3px solid var(--navy);border-radius:12px;padding:12px 14px}.tile .k{font-size:12px;color:var(--muted)}.tile .v{font:400 26px Georgia,serif;color:var(--navy)}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,480px),1fr));gap:14px}
+.warn{background:#FFF8EA;border:1px solid #F0D9A6;border-radius:8px;padding:8px 10px;font-size:13px;margin:8px 0}
+.new{background:#FFFCF3}.hide{display:none}.small{font-size:12px;color:var(--muted)}
+.bar{height:10px;border-radius:5px;background:var(--soft);overflow:hidden}.bar i{display:block;height:100%;background:var(--navy)}
+footer{max-width:1100px;margin:0 auto;padding:4px 18px 26px;font-size:12px;color:var(--muted)}
+.todo{display:flex;gap:8px;align-items:flex-start;padding:7px 0;border-bottom:1px solid var(--line)}.todo input[type=checkbox]{width:18px;height:18px;margin-top:2px}.todo .tx{flex:1}.todo.dn .tx{text-decoration:line-through;color:var(--muted)}
+.bk{border:1px solid var(--line);border-radius:12px;padding:12px 14px;background:#fff}.bk h3{margin:0 0 6px;font-size:14.5px;color:var(--navy)}.cnt{color:var(--muted);font-weight:400;font-size:12.5px}
+.carry{font-size:11.5px;color:var(--warn);font-weight:600}.grid3{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:12px}
+.cmp h3{font-size:14.5px;margin:0 0 6px}.cmp .ok{border-left:4px solid var(--good)}.cmp .add{border-left:4px solid var(--gold)}.cmp .info{border-left:4px solid #B9C2CE}
+.em{font-size:12.5px;color:var(--muted)}.em a{color:var(--navy2,#3B5B85)}.src{font-size:11px;color:var(--muted)}
+</style></head><body>
+<header><div class="hd"><div><h1>Daily Task Tracker</h1><div class="s">Plan · speak · log · checked against your emails</div></div><div style="margin-left:auto;display:flex;gap:12px;align-items:center"><span class="s" id="saved">Loading…</span><span class="s" id="who"></span><button class="btn" id="out" style="display:none;padding:4px 10px">Sign out</button></div></div>
+<nav id="nav"><button data-t="today" class="on">Today</button><button data-t="todo">To-do</button><button data-t="cmp">Voice vs email</button><button data-t="tasks">Tasks</button><button data-t="dash">Dashboard</button><button data-t="log">Daily log</button><button data-t="data">Import / export</button></nav></header>
+<div id="login" style="display:none;position:fixed;inset:0;background:#F6F7F9;z-index:50;place-items:center"><div class="card" style="max-width:420px;text-align:center;padding:30px"><h1 style="font:400 26px Georgia,serif;color:#1C3557;margin:0 0 6px">Daily Task Tracker</h1><p class="note">Sign in with your company Google account.</p><button class="btn p" id="gin" style="padding:10px 18px">Sign in with Google</button><p class="small" id="lmsg" style="margin-top:12px"></p></div></div>
+<div id="demo" style="display:none;background:#FFF8EA;border-bottom:1px solid #F0D9A6;padding:6px 18px;font-size:12.5px;text-align:center">Demo mode: the Firebase settings are not filled in yet, so data is kept only in this browser.</div>
+<main>
+<section id="t-today">
+ <div class="tiles" id="pvTiles"></div>
+ <div class="card"><h2>Speak or type</h2><p class="note">Work done: <i>"CK website update, two hours, updated the fast track project, finished."</i> · Plans: <i>"Tomorrow: call Etisalat about the licence. Next week: Procore renewal."</i> If the microphone is blocked, press <b>Windows + H</b> (or the microphone on your phone keyboard) and speak into the box.</p>
+  <div class="vrow"><button class="mic" id="mic" title="Speak">🎤</button><div style="flex:1;min-width:260px"><textarea id="said" placeholder="Your words appear here (you can also type or correct them)"></textarea>
+  <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap;align-items:center"><label class="small">Date <input type="date" id="logDate"></label><button class="btn p" id="read">Read into entries</button><button class="btn" id="clear">Clear</button><span class="small" id="micState"></span></div></div></div>
+  <div id="draft"></div></div>
+ <div class="grid2"><div class="card"><h2>To-do today</h2><div id="todayTodos"></div></div><div class="card"><h2>Logged for <span id="dayLbl"></span></h2><div id="todayTbl"></div></div></div>
+</section>
+<section id="t-todo" class="hide">
+ <div class="card"><h2>Add a to-do</h2><div style="display:flex;gap:8px;flex-wrap:wrap"><input id="tdText" placeholder="What needs doing" style="flex:2;min-width:220px"><select id="tdWhen"><option value="today">Today</option><option value="tomorrow">Tomorrow</option><option value="thisweek">This week</option><option value="nextweek">Next week</option><option value="thismonth">This month</option><option value="later">Later</option><option value="date">On a date…</option></select><input type="date" id="tdDate" class="hide"><select id="tdTask"></select><button class="btn p" id="tdAdd">Add</button></div><p class="small" style="margin:6px 0 0">Unfinished to-dos move forward automatically and are marked "carried over".</p></div>
+ <div class="grid3" id="buckets"></div>
+</section>
+<section id="t-cmp" class="hide">
+ <div class="card" style="display:flex;gap:12px;align-items:center;flex-wrap:wrap"><h2 style="margin:0">Voice / typed log vs emails</h2><input type="date" id="cDate"><button class="btn" id="scan">Check emails now</button><span class="small" id="scanMsg"></span></div>
+ <p class="note">Emails are read every evening at 19:00 (subject, contact and date only: no email text). They show activity, not time: minutes always come from your own entry.</p>
+ <div class="grid3 cmp" id="cmpBox"></div>
+</section>
+<section id="t-tasks" class="hide">
+ <div class="card"><h2>Task list</h2><p class="note">Status is automatic. <b>Email keywords</b> help link emails to a task: add names of companies or people, separated by commas (e.g. <i>etisalat, e&amp;</i>).</p>
+  <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px"><input id="nTask" placeholder="New task" style="flex:2;min-width:200px"><select id="nProj"></select><select id="nDept"></select><input type="date" id="nDue"><button class="btn p" id="addTask">Add task</button></div>
+  <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px"><input id="tq" placeholder="Search" style="flex:1;min-width:160px"><select id="tst"><option value="">All statuses</option><option>Not Started</option><option>In Progress</option><option>Delayed</option><option>Completed</option></select></div>
+  <div id="taskTbl"></div></div>
+ <div class="grid2"><div class="card"><h2>Projects</h2><div style="display:flex;gap:8px"><input id="nP" placeholder="Add project"><button class="btn" id="addP">Add</button></div><p class="small" id="pList"></p></div>
+ <div class="card"><h2>Departments</h2><div style="display:flex;gap:8px"><input id="nD" placeholder="Add department"><button class="btn" id="addD">Add</button></div><p class="small" id="dList"></p></div></div>
+</section>
+<section id="t-dash" class="hide"><div class="tiles" id="dTiles"></div><div class="grid2"><div class="card"><h2>This week (Mon to Sat)</h2><div id="week"></div></div><div class="card"><h2>Tasks by status</h2><div id="stat"></div></div></div>
+ <div class="grid2"><div class="card"><h2>By project</h2><div id="byP"></div></div><div class="card"><h2>By department</h2><div id="byD"></div></div></div></section>
+<section id="t-log" class="hide"><div class="card"><h2>Daily log (master)</h2><div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px"><input type="date" id="lf"><input type="date" id="lt"><input id="lq" placeholder="Search task or remark"></div><div id="logTbl"></div></div></section>
+<section id="t-data" class="hide"><div class="card"><h2>Import your current Excel tracker</h2><p class="note">Loads Task List, Daily Log, projects and departments from the existing "Daily Task Tracker - CEO Dashboard" file. Do this once to start.</p><input type="file" id="imp" accept=".xlsx"> <span class="small" id="impMsg"></span></div>
+ <div class="card"><h2>Export</h2><p class="note">Excel with Dashboard, Daily Log, Task List, To-do, Project Summary and Department Summary.</p><button class="btn g" id="exp">Download Excel</button></div>
+ <div class="card"><h2>Where the data is kept</h2><p class="note">In a Google Sheet in your own Google Drive, saved automatically. <a id="sheetLink" target="_blank">Open the data sheet</a></p></div></section>
+</main>
+<footer>Data: your Google Sheet (company account). Emails: subject, contact and date only, from your own mailbox.</footer>
+<script>
+const $=id=>document.getElementById(id);
+let S={tasks:[],log:[],todos:[],projects:['General'],depts:['Marketing','Sales','Operations','Logistic','IT / Admin','Procurement','CEO office',"Cem's Personal",'Project Management'],email:[]};
+// ══ CONFIGURATION ═══════════════════════════════════════════════════════════
+// Paste the Firebase web settings here (Firebase console → Project settings → Your apps → Web app → Config).
+const FIREBASE_CONFIG = { apiKey: "AIzaSyB40xEWpk0iPfgUDSCIFDrnGagFauNAtSY", authDomain: "ck-task-tracker-fbe99.firebaseapp.com", databaseURL: "https://ck-task-tracker-fbe99-default-rtdb.europe-west1.firebasedatabase.app", projectId: "ck-task-tracker-fbe99", storageBucket: "ck-task-tracker-fbe99.firebasestorage.app", messagingSenderId: "657336033232", appId: "1:657336033232:web:d5d244ea0d6d2ac5f8a3d5" };
+// Company e-mail domains allowed to sign in (must match the database rules).
+const ALLOWED_DOMAINS = ["ckarchitecture.com"];
+// ════════════════════════════════════════════════════════════════════════════
+// Storage is behind one small "store" layer. Today: Firebase. Later (if chosen): Google Workspace,
+// by swapping this layer only. The data format (tasks, log, todos, projects, depts) is the same everywhere,
+// and "Download backup" / "Restore backup" move it between them without loss.
+const FB_ON = !!(window.firebase && FIREBASE_CONFIG.apiKey && FIREBASE_CONFIG.apiKey !== 'PASTE');
+const LKEY='dtt-v3';let USER=null,DBR=null,LAST={};
+const flat=s=>{const m={};(s.tasks||[]).forEach(x=>m['tasks/'+x.id]=x);(s.log||[]).forEach(x=>m['log/'+x.id]=x);(s.todos||[]).forEach(x=>m['todos/'+x.id]=x);m['lists']={projects:s.projects||[],depts:s.depts||[]};return m};
+const Store={
+ async load(){if(!FB_ON){try{return JSON.parse(localStorage.getItem(LKEY))||{}}catch(e){return {}}}
+  const snap=await DBR.once('value');const v=snap.val()||{};const o={tasks:Object.values(v.tasks||{}),log:Object.values(v.log||{}),todos:Object.values(v.todos||{}),projects:(v.lists||{}).projects||[],depts:(v.lists||{}).depts||[],email:Object.values(v.email||{})};
+  o.log.forEach(l=>{l.mins=+l.mins||0;l.done=!!l.done});LAST=Object.fromEntries(Object.entries(flat(o)).map(([k,x])=>[k,JSON.stringify(x)]));return o},
+ async saveAll(s){if(!FB_ON){localStorage.setItem(LKEY,JSON.stringify(s));return}
+  const now=flat(s),up={};Object.entries(now).forEach(([k,x])=>{const j=JSON.stringify(x);if(LAST[k]!==j)up[k]=x});Object.keys(LAST).forEach(k=>{if(!(k in now))up[k]=null});
+  if(Object.keys(up).length)await DBR.update(up);LAST=Object.fromEntries(Object.entries(now).map(([k,x])=>[k,JSON.stringify(x)]))}};
+const api=(fn,...a)=>fn==='getAll'?Store.load():fn==='saveAll'?Store.saveAll(a[0]):Promise.resolve(null);
+const EMAIL_ON=false; // Gmail connection: next stage
+const GAS=false;
+let saveT=null;const save=()=>{$('saved').textContent='Saving…';clearTimeout(saveT);saveT=setTimeout(()=>{S.tasks.forEach(t=>{if(!t.id)t.id=uid()});const {email,me,sheetUrl,...data}=S;Store.saveAll(data).then(()=>$('saved').textContent='Saved '+new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'})).catch(e=>$('saved').textContent='Not saved: '+(e&&e.message||e))},500)};
+const ds=d=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+const today=()=>ds(new Date());const addD=(s,n)=>{const d=new Date(s+'T00:00:00');d.setDate(d.getDate()+n);return ds(d)};
+const fmtD=d=>d?new Date(d+'T00:00:00').toLocaleDateString('en-GB',{day:'2-digit',month:'short'}):'';
+const esc=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const norm=s=>String(s||'').toLowerCase().replace(/[^a-z0-9 ]/g,' ').replace(/\s+/g,' ').trim();
+const uid=()=>Math.random().toString(36).slice(2,10);
+const wd=(a,b)=>{let n=0;for(let d=new Date(a+'T00:00:00');d<=new Date(b+'T00:00:00');d.setDate(d.getDate()+1))if(d.getDay()!==0)n++;return n};
+const weekStart=(s)=>{const d=new Date((s||today())+'T00:00:00');d.setDate(d.getDate()-((d.getDay()+6)%7));return ds(d)};
+const satOf=s=>addD(weekStart(s),5),monthEnd=s=>{const d=new Date(s+'T00:00:00');return ds(new Date(d.getFullYear(),d.getMonth()+1,0))};
+function planDate(w){const t=today();return w==='today'?t:w==='tomorrow'?(new Date(addD(t,1)+'T00:00:00').getDay()===0?addD(t,2):addD(t,1)):w==='thisweek'?satOf(t):w==='nextweek'?addD(weekStart(t),7):w==='thismonth'?monthEnd(t):''}
+function taskInfo(t){const L=S.log.filter(l=>l.task===t.name).sort((a,b)=>a.date<b.date?-1:1);const started=L.length?L[0].date:'',last=L.length?L.at(-1).date:'',fin=L.find(l=>l.done);const completed=fin?fin.date:'';
+ const mins=L.reduce((s,l)=>s+(+l.mins||0),0);let status='Not Started';if(completed)status='Completed';else if(t.due&&t.due<today())status='Delayed';else if(L.length)status='In Progress';
+ return {started,last,completed,days:started?wd(started,completed||today()):'',over:t.due&&!completed&&t.due<today()?Math.max(0,wd(t.due,today())-1):0,hrs:mins/60,status}}
+// ── speech to entries (rules, no AI)
+const NUM={zero:0,one:1,a:1,an:1,two:2,three:3,four:4,five:5,six:6,seven:7,eight:8,nine:9,ten:10,eleven:11,twelve:12,fifteen:15,twenty:20,thirty:30,forty:40,'forty five':45,fifty:50,sixty:60,ninety:90};
+function minsOf(s){s=' '+s.toLowerCase().replace(/-/g,' ')+' ';let m=0,hit=false;
+ const fixed=[[/\b(half an hour|half hour)\b/,30],[/\b(quarter of an hour|quarter hour)\b/,15],[/\b(an hour and a half|one and a half hours?|1\.5 hours?|1 and a half hours?)\b/,90],[/\b(two and a half hours?|2\.5 hours?)\b/,150],[/\b(three quarters of an hour)\b/,45]];
+ for(const [rx,v] of fixed){if(rx.test(s)){s=s.replace(rx,' ');m+=v;hit=true}}
+ s=s.replace(/\b(forty|thirty|twenty|fifty) (five)\b/g,(x,a,b)=>String(NUM[a]+5));
+ s=s.replace(/\b(zero|one|a|an|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|fifteen|twenty|thirty|forty|fifty|sixty|ninety)\b(?= (hours?|hrs?|minutes?|mins?))/g,w=>String(NUM[w]));
+ s=s.replace(/(\d+(?:\.\d+)?)\s*(hours?|hrs?|h)\b/g,(x,n)=>{m+=Math.round(parseFloat(n)*60);hit=true;return ' '});
+ s=s.replace(/(\d+)\s*(minutes?|mins?|m)\b/g,(x,n)=>{m+=parseInt(n);hit=true;return ' '});
+ return hit?m:null}
+const DONE=/\b(finished|completed|complete|done|closed|wrapped up|finalised|finalized)\b/i,NOTDONE=/\b(not (yet )?(finished|completed|done)|still (ongoing|pending|in progress)|pending|ongoing|in progress|continue tomorrow|not complete)\b/i;
+function bestTask(seg){const n=' '+norm(seg)+' ';let best=null,score=0;
+ S.tasks.forEach(t=>{const w=norm(t.name).split(' ').filter(x=>x.length>2&&!['the','and','for','with'].includes(x));if(!w.length)return;const hits=w.filter(x=>n.includes(' '+x+' ')||n.includes(' '+x)).length;let sc=hits/w.length;if(n.includes(' '+norm(t.name)+' '))sc=1.5;if(sc>score){score=sc;best=t}});
+ return score>=0.5?best:null}
+function parseSpeech(txt){const parts=txt.replace(/\b(next|then|after that|also|and then|another task|moving on)\b/gi,'|').split(/[|.;\n]+/).map(s=>s.trim()).filter(s=>s.length>2);
+ const out=[];parts.forEach(p=>{const t=bestTask(p),mins=minsOf(p);const done=NOTDONE.test(p)?false:DONE.test(p);
+  if(!t&&mins==null&&out.length){const last=out.at(-1);last.remarks=(last.remarks?last.remarks+'; ':'')+cleanRem(p,null);if(DONE.test(p)&&!NOTDONE.test(p))last.done=true;return}
+  const pj=t?'':(S.projects.find(x=>x!=='General'&&norm(p).includes(norm(x)))||'');out.push({id:uid(),task:t?t.name:'',newName:t?'':titleOf(p),proj:pj||undefined,mins:mins==null?'':mins,done,remarks:cleanRem(p,t)})});
+ return out}
+function cleanRem(p,t){let r=' '+p+' ';if(t){norm(t.name).split(' ').filter(x=>x.length>1&&!['the','and','for','with','of','to'].includes(x)).forEach(w=>{r=r.replace(new RegExp('\\b'+w+'\\w*\\b','i'),' ')})}
+ r=r.replace(/\b(half an hour|half hour|an hour and a half|one and a half hours?|quarter of an hour|\d+(\.\d+)?\s*(hours?|hrs?|minutes?|mins?)|(one|two|three|four|five|six|ten|fifteen|twenty|thirty|forty|forty five|fifty|sixty|ninety|an|a)\s+(hours?|minutes?|mins?))\b/gi,' ')
+  .replace(/\b(not (yet )?(finished|completed|done)|(still )?(pending|ongoing|in progress)|finished|completed|complete|done)\b/gi,' ').replace(/\b(worked on|i worked on|spent|for|on the|task)\b/gi,' ').replace(/\s+/g,' ').replace(/(\s*,\s*)+/g,', ').replace(/^[\s,]+|[\s,]+$/g,'').replace(/^(the|a|an|on|and|then|issue|with)\b\s*,?\s*/i,'').replace(/^(the|a|an|on|and)\b\s*,?\s*/i,'').replace(/^[\s,]+|[\s,]+$/g,'');
+ return r?r.charAt(0).toUpperCase()+r.slice(1):''}
+function titleOf(p){const s=cleanRem(p,null).split(',')[0];return s.split(' ').slice(0,6).join(' ')}
+// ── voice
+let rec=null,recOn=false;const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+if(!SR){$('micState').textContent='Voice not available in this browser: use Chrome or Edge, or type.';$('mic').disabled=true}
+$('mic').onclick=()=>{if(!SR)return;if(recOn){rec.stop();return}rec=new SR();rec.lang='en-GB';rec.continuous=true;rec.interimResults=true;const base=$('said').value?$('said').value.trim()+' ':'';let fin='';
+ rec.onresult=e=>{let inter='';for(let i=e.resultIndex;i<e.results.length;i++){if(e.results[i].isFinal)fin+=e.results[i][0].transcript+'. ';else inter+=e.results[i][0].transcript}$('said').value=base+fin+inter};
+ rec.onstart=()=>{recOn=true;$('mic').classList.add('rec');$('micState').textContent='Listening… press again to stop'};
+ rec.onend=()=>{recOn=false;$('mic').classList.remove('rec');$('micState').textContent='';if($('said').value.trim())readDraft()};
+ rec.onerror=e=>{$('micState').textContent=e.error==='not-allowed'?'Microphone blocked: allow it in the browser address bar':'Voice error: '+e.error};rec.start()};
+
+// plans spoken: "tomorrow: ...", "next week ...", "to do ...", "remind me ..."
+const PLANRX=/^\s*(today|tomorrow|this week|next week|this month|later|to ?do|remind me( to)?)\b[\s:,-]*/i;
+function parseAll(txt){const parts=txt.replace(/\b(next task|then|after that|also|and then|another task|moving on)\b/gi,'|').split(/[|.;\n]+/).map(s=>s.trim()).filter(s=>s.length>2);
+ const todos=[],work=[];parts.forEach(p=>{const m=PLANRX.exec(p);if(m&&!/^today\b/i.test(m[1])||(m&&/^today\b/i.test(m[1])&&!minsOf(p))){const k=m[1].toLowerCase().replace(/\s/g,'');const w=(k.startsWith('remind')||k==='todo')?'today':k;const text=p.slice(m[0].length).trim();const t=bestTask(text);todos.push({id:uid(),text:text.charAt(0).toUpperCase()+text.slice(1),task:t?t.name:'',plan:planDate(w==='later'?'later':w),done:false,created:today(),kind:'todo'});}else work.push(p)});
+ return todos.concat(parseSpeech(work.join('. ')))}
+// ── draft rows
+let D=[];
+function readDraft(){D=parseAll($('said').value);drawDraft()}
+$('read').onclick=readDraft;$('clear').onclick=()=>{$('said').value='';D=[];drawDraft()};
+const opts=(arr,v)=>arr.map(x=>`<option${x===v?' selected':''}>${esc(x)}</option>`).join('');
+const WHEN=[['today','Today'],['tomorrow','Tomorrow'],['thisweek','This week'],['nextweek','Next week'],['thismonth','This month'],['later','Later']];
+function drawDraft(){const box=$('draft');if(!D.length){box.innerHTML='';return}
+ const W=D.filter(r=>r.kind!=='todo'),T=D.filter(r=>r.kind==='todo');let h=`<h2 style="margin-top:14px">Check and save</h2>`;
+ if(T.length)h+=`<p class="note">To-dos (${T.length})</p><table><tr><th>To-do</th><th>When</th><th></th></tr>`+T.map(r=>{const i=D.indexOf(r);return `<tr class="new"><td><input data-i="${i}" data-f="text" value="${esc(r.text)}"></td><td><input type="date" data-i="${i}" data-f="plan" value="${r.plan}"></td><td><button class="btn" data-del="${i}">✕</button></td></tr>`}).join('')+'</table>';
+ if(W.length)h+=`<p class="note" style="margin-top:8px">Work done (${W.length}): pick a task if it was not recognised, or keep it as a new task.</p><div style="overflow:auto"><table><tr><th>Task</th><th class="r">Minutes</th><th>Finished?</th><th>Remarks</th><th></th></tr>`+W.map(r=>{const i=D.indexOf(r);return `<tr class="${r.task?'':'new'}"><td><select data-i="${i}" data-f="task"><option value="">➕ New task: ${esc(r.newName||'')}</option>${opts(S.tasks.filter(t=>taskInfo(t).status!=='Completed'||t.name===r.task).map(t=>t.name),r.task)}</select>${r.task?'':`<input data-i="${i}" data-f="newName" value="${esc(r.newName)}" style="margin-top:4px" placeholder="New task name"><div style="display:flex;gap:4px;margin-top:4px"><select data-i="${i}" data-f="proj">${opts(S.projects,r.proj||'General')}</select><select data-i="${i}" data-f="dept">${opts(S.depts,r.dept||S.depts[0])}</select></div>`}</td>
+ <td class="r"><input type="number" min="0" data-i="${i}" data-f="mins" value="${r.mins}" style="width:80px${r.mins===''?';background:#FFF4D6':''}"></td><td><select data-i="${i}" data-f="done"><option value="0"${r.done?'':' selected'}>No</option><option value="1"${r.done?' selected':''}>Yes</option></select></td>
+ <td><input data-i="${i}" data-f="remarks" value="${esc(r.remarks)}"></td><td><button class="btn" data-del="${i}">✕</button></td></tr>`}).join('')+'</table></div>';
+ box.innerHTML=h+`<div style="margin-top:10px;display:flex;gap:8px"><button class="btn p" id="saveD">Save</button><span class="small" id="dMsg"></span></div>`;
+ box.querySelectorAll('[data-f]').forEach(x=>x.onchange=x.oninput=()=>{const r=D[x.dataset.i],f=x.dataset.f;r[f]=f==='done'?x.value==='1':(f==='mins'?(x.value===''?'':+x.value):x.value);if(f==='task'&&x.tagName==='SELECT')drawDraft()});
+ box.querySelectorAll('[data-del]').forEach(b=>b.onclick=()=>{D.splice(+b.dataset.del,1);drawDraft()});
+ $('saveD').onclick=()=>{const bad=D.filter(r=>r.kind!=='todo'&&(r.mins===''||(!r.task&&!String(r.newName||'').trim())));if(bad.length){$('dMsg').textContent='Add minutes (and a name for new tasks) on the highlighted rows';return}
+  const dt=$('logDate').value||today();D.forEach(r=>{if(r.kind==='todo'){const {kind,...t}=r;S.todos.push(t);return}let name=r.task;if(!name){name=r.newName.trim();if(!S.tasks.find(t=>norm(t.name)===norm(name)))S.tasks.push({name,proj:r.proj||'General',dept:r.dept||S.depts[0],due:'',keywords:''})}
+   S.log.push({id:uid(),date:dt,task:name,mins:+r.mins,done:!!r.done,remarks:r.remarks||'',source:r.source||'voice'});if(r.done)S.todos.forEach(t=>{if(!t.done&&t.task===name){t.done=true;t.doneDate=dt}})});save();D=[];$('said').value='';drawDraft();drawAll()}}
+// ── to-do
+function bucketOf(t){const td=today();if(t.done)return 'done';if(!t.plan)return 'later';if(t.plan<td)return 'carry';if(t.plan===td)return 'today';if(t.plan===planDate('tomorrow'))return 'tomorrow';if(t.plan<=satOf(td))return 'thisweek';if(t.plan<=satOf(addD(weekStart(td),7)))return 'nextweek';if(t.plan<=monthEnd(td))return 'thismonth';return 'later'}
+function todoRow(t){return `<div class="todo${t.done?' dn':''}"><input type="checkbox" data-td="${t.id}"${t.done?' checked':''}><div class="tx">${esc(t.text)}${t.task?` <span class="small">· ${esc(t.task)}</span>`:''}${bucketOf(t)==='carry'?` <span class="carry">carried over from ${fmtD(t.plan)}</span>`:''}${t.plan&&!['today','carry'].includes(bucketOf(t))&&!t.done?` <span class="small">${fmtD(t.plan)}</span>`:''}</div><button class="btn" data-tdx="${t.id}" title="Remove">✕</button></div>`}
+function wireTodos(root){root.querySelectorAll('[data-td]').forEach(c=>c.onchange=()=>{const t=S.todos.find(x=>x.id===c.dataset.td);t.done=c.checked;t.doneDate=c.checked?today():'';save();drawAll()});root.querySelectorAll('[data-tdx]').forEach(b=>b.onclick=()=>{if(confirm('Remove this to-do?')){S.todos=S.todos.filter(x=>x.id!==b.dataset.tdx);save();drawAll()}})}
+function drawTodo(){const B={};S.todos.forEach(t=>{const k=bucketOf(t);(B[k]=B[k]||[]).push(t)});
+ const names=[['carry','Carried over'],['today','Today'],['tomorrow','Tomorrow'],['thisweek','Rest of this week'],['nextweek','Next week'],['thismonth','Later this month'],['later','Later'],['done','Done (last 7 days)']];
+ $('buckets').innerHTML=names.map(([k,n])=>{let L=(B[k]||[]);if(k==='done')L=L.filter(t=>t.doneDate>=addD(today(),-7));if(!L.length&&['carry','done'].includes(k))return '';return `<div class="bk"><h3>${n} <span class="cnt">${L.length}</span></h3>${L.map(todoRow).join('')||'<p class="small">Nothing planned</p>'}</div>`}).join('');wireTodos($('buckets'));
+ const tt=S.todos.filter(t=>['today','carry'].includes(bucketOf(t))||(t.done&&t.doneDate===today()));$('todayTodos').innerHTML=tt.length?tt.map(todoRow).join(''):'<p class="note">Nothing planned for today. Say "today: …" or add one in To-do.</p>';wireTodos($('todayTodos'));
+ $('tdTask').innerHTML='<option value="">(no task link)</option>'+opts(S.tasks.filter(t=>taskInfo(t).status!=='Completed').map(t=>t.name));
+ // planned vs done today
+ const td=today(),planned=S.todos.filter(t=>t.plan&&t.plan<=td&&(!t.done||t.doneDate===td)&&!(t.done&&t.doneDate<td)),done=planned.filter(t=>t.done),carried=S.todos.filter(t=>!t.done&&t.plan&&t.plan<td);
+ const L=S.log.filter(l=>l.date===td),plannedTasks=new Set(planned.map(t=>t.task).filter(Boolean)),unpl=new Set(L.filter(l=>!plannedTasks.has(l.task)).map(l=>l.task));
+ const tile=(k,v,n)=>`<div class="tile"><div class="k">${k}</div><div class="v">${v}</div><div class="small">${n||''}</div></div>`;
+ $('pvTiles').innerHTML=tile('Planned for today',planned.length,carried.length?carried.length+' carried over':'')+tile('Done',done.length,planned.length?Math.round(done.length/planned.length*100)+'% of plan':'')+tile('Unplanned work',unpl.size,'tasks logged, not on the list')+tile('Hours logged today',(L.reduce((s,l)=>s+l.mins,0)/60).toFixed(1),L.length+' entries')+(EMAIL_ON?tile('Emails today',S.email.filter(e=>e.date===td).length,'from your mailbox'):'')}
+$('tdWhen').onchange=()=>$('tdDate').classList.toggle('hide',$('tdWhen').value!=='date');
+$('tdAdd').onclick=()=>{const tx=$('tdText').value.trim();if(!tx)return;const w=$('tdWhen').value;S.todos.push({id:uid(),text:tx,task:$('tdTask').value,plan:w==='date'?$('tdDate').value:planDate(w),done:false,doneDate:'',created:today()});$('tdText').value='';save();drawAll()};
+// ── voice vs email
+function drawCmp(){const dt=$('cDate').value||today(),L=S.log.filter(l=>l.date===dt),E=S.email.filter(e=>e.date===dt);
+ const byT={};E.forEach(e=>{const k=e.task||'';(byT[k]=byT[k]||[]).push(e)});const loggedT=new Set(L.map(l=>l.task));
+ const conf=[...loggedT].filter(t=>byT[t]),noMail=[...loggedT].filter(t=>!byT[t]),mailOnly=Object.keys(byT).filter(t=>t&&!loggedT.has(t)),unm=byT['']||[];
+ const emList=es=>es.slice(0,4).map(e=>`<div class="em">${e.dir==='sent'?'↗ to':'↙ from'} ${esc(e.who)} · <a href="${e.link}" target="_blank">${esc(e.subject||'(no subject)')}</a></div>`).join('')+(es.length>4?`<div class="em">… ${es.length-4} more</div>`:'');
+ const mins=t=>L.filter(l=>l.task===t).reduce((s,l)=>s+l.mins,0);
+ $('cmpBox').innerHTML=`<div class="card ok"><h3>✅ Logged and seen in email <span class="cnt">${conf.length}</span></h3>${conf.map(t=>`<div style="margin:6px 0"><b>${esc(t)}</b> · ${mins(t)} min logged · ${byT[t].length} email(s)${emList(byT[t])}</div>`).join('')||'<p class="small">None</p>'}</div>
+ <div class="card add"><h3>➕ In email, not in your log <span class="cnt">${mailOnly.length+(unm.length?1:0)}</span></h3>${mailOnly.map(t=>`<div style="margin:6px 0"><b>${esc(t)}</b> · ${byT[t].length} email(s)${emList(byT[t])}<div style="margin-top:4px;display:flex;gap:6px;align-items:center"><input type="number" min="0" value="15" style="width:70px" id="m_${btoa(unescape(encodeURIComponent(t))).replace(/=/g,'')}"> min <button class="btn" data-add="${esc(t)}">Add to log</button></div></div>`).join('')}
+ ${unm.length?`<div style="margin-top:10px"><b>Not linked to a task (${unm.length})</b>${unm.slice(0,8).map(e=>`<div class="em" style="display:flex;gap:6px;align-items:center;margin:4px 0"><span style="flex:1">${e.dir==='sent'?'↗':'↙'} ${esc(e.who)} · <a href="${e.link}" target="_blank">${esc(e.subject||'(no subject)')}</a></span><select data-link="${e.id}" style="max-width:150px;width:150px"><option value="">link to task…</option>${opts(S.tasks.filter(t=>taskInfo(t).status!=='Completed').map(t=>t.name))}</select></div>`).join('')}${unm.length>8?`<div class="em">… ${unm.length-8} more (newsletters and general emails can be ignored)</div>`:''}</div>`:''}
+ ${!mailOnly.length&&!unm.length?'<p class="small">None</p>':''}</div>
+ <div class="card info"><h3>ℹ️ Logged, no email that day <span class="cnt">${noMail.length}</span></h3><p class="small">Normal for calls, meetings, site visits and offline work.</p>${noMail.map(t=>`<div style="margin:4px 0">${esc(t)} · ${mins(t)} min</div>`).join('')||'<p class="small">None</p>'}</div>`;
+ $('cmpBox').querySelectorAll('[data-add]').forEach(b=>b.onclick=()=>{const t=b.dataset.add,inp=$('m_'+btoa(unescape(encodeURIComponent(t))).replace(/=/g,''));S.log.push({id:uid(),date:dt,task:t,mins:+inp.value||0,done:false,remarks:'Added from emails',source:'email'});save();drawAll()});
+ $('cmpBox').querySelectorAll('[data-link]').forEach(s=>s.onchange=()=>{if(!s.value)return;const e=S.email.find(x=>x.id===s.dataset.link);e.task=s.value;api('setEmailTask',e.id,s.value);drawCmp()})}
+$('cDate').onchange=drawCmp;
+$('scan').onclick=()=>{$('scanMsg').textContent='Checking…';api('scanEmails',2).then(n=>api('getAll')).then(d=>{if(d){S.email=d.email}$('scanMsg').textContent='Done';drawAll()}).catch(e=>$('scanMsg').textContent='Could not check emails: '+(e&&e.message||e))};
+// ── views
+const tInfo=name=>{const t=S.tasks.find(x=>x.name===name)||{};return t};
+function drawToday(){const dt=$('logDate').value||today();$('dayLbl').textContent=new Date(dt+'T00:00:00').toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long'});
+ const L=S.log.filter(l=>l.date===dt);const tot=L.reduce((s,l)=>s+(+l.mins||0),0);
+ $('todayTbl').innerHTML=L.length?`<table><tr><th>Task</th><th>Project</th><th class="r">Minutes</th><th>Finished?</th><th>Remarks</th><th></th></tr>`+L.map(l=>`<tr><td>${esc(l.task)}</td><td>${esc(tInfo(l.task).proj||'')}</td><td class="r">${l.mins}</td><td>${l.done?'Yes':'No'}</td><td>${esc(l.remarks)}</td><td><button class="btn" data-dl="${l.id}">✕</button></td></tr>`).join('')+`<tr><td colspan="2"><b>Total</b></td><td class="r"><b>${tot}</b></td><td colspan="3" class="small">${(tot/60).toFixed(1)} hours</td></tr></table>`:'<p class="note">Nothing logged yet for this day.</p>';
+ $('todayTbl').querySelectorAll('[data-dl]').forEach(b=>b.onclick=()=>{if(confirm('Remove this entry?')){S.log=S.log.filter(l=>l.id!==b.dataset.dl);save();drawAll()}})}
+function drawTasks(){const q=norm($('tq').value),fs=$('tst').value;const rows=S.tasks.map(t=>({t,i:taskInfo(t)})).filter(x=>(!q||norm(x.t.name+' '+x.t.proj+' '+x.t.dept).includes(q))&&(!fs||x.i.status===fs));
+ $('taskTbl').innerHTML='<div style="overflow:auto"><table><tr><th>Task</th><th>Project</th><th>Department</th><th>Due</th><th>Started</th><th>Last worked</th><th>Completed</th><th class="r">Days</th><th class="r">Hours</th><th>Status</th><th>Email keywords</th></tr>'+rows.map(({t,i},k)=>`<tr><td>${esc(t.name)}</td><td><select data-k="${S.tasks.indexOf(t)}" data-tf="proj">${opts(S.projects,t.proj)}</select></td><td><select data-k="${S.tasks.indexOf(t)}" data-tf="dept">${opts(S.depts,t.dept)}</select></td><td><input type="date" data-k="${S.tasks.indexOf(t)}" data-tf="due" value="${t.due||''}"></td><td>${fmtD(i.started)}</td><td>${fmtD(i.last)}</td><td>${fmtD(i.completed)}</td><td class="r">${i.days}</td><td class="r">${i.hrs.toFixed(1)}</td><td><span class="pill ${i.status.replace(' ','')}">${i.status}</span>${i.over?` <span class="small">${i.over}d late</span>`:''}</td><td><input data-k="${S.tasks.indexOf(t)}" data-tf="keywords" value="${esc(t.keywords||'')}" placeholder="e.g. etisalat" style="min-width:120px"></td></tr>`).join('')+'</table></div>';
+ $('taskTbl').querySelectorAll('[data-tf]').forEach(x=>x.onchange=()=>{S.tasks[x.dataset.k][x.dataset.tf]=x.value;save();drawAll()});
+ $('nProj').innerHTML=opts(S.projects);$('nDept').innerHTML=opts(S.depts);$('pList').textContent=S.projects.join(' · ');$('dList').textContent=S.depts.join(' · ')}
+
+function drawDash(){const t=today(),ws=new Date(weekStart()+'T00:00:00'),wsS=ds(ws),we=new Date(ws);we.setDate(we.getDate()+5);const weS=ds(we);
+ const LT=S.log.filter(l=>l.date===t),LW=S.log.filter(l=>l.date>=wsS&&l.date<=weS);const I=S.tasks.map(x=>taskInfo(x));
+ const tile=(k,v,n)=>`<div class="tile"><div class="k">${k}</div><div class="v">${v}</div><div class="small">${n||''}</div></div>`;
+ $('dTiles').innerHTML=tile('Tasks worked today',new Set(LT.map(l=>l.task)).size,(LT.reduce((s,l)=>s+l.mins,0)/60).toFixed(1)+' hours')+tile('Finished today',LT.filter(l=>l.done).length,'')+tile('Hours this week',(LW.reduce((s,l)=>s+l.mins,0)/60).toFixed(1),new Set(LW.map(l=>l.task)).size+' tasks')+tile('Open tasks',I.filter(i=>i.status!=='Completed').length,'')+tile('Delayed',I.filter(i=>i.status==='Delayed').length,'past due date')+tile('Avg days to complete',(()=>{const c=I.filter(i=>i.status==='Completed');return c.length?(c.reduce((s,i)=>s+i.days,0)/c.length).toFixed(1):'—'})(),'working days');
+ let w='<table><tr><th>Day</th><th class="r">Tasks</th><th class="r">Finished</th><th class="r">Hours</th><th></th></tr>';const mxH=Math.max(1,...[0,1,2,3,4,5].map(k=>{const d=new Date(ws);d.setDate(d.getDate()+k);return S.log.filter(l=>l.date===ds(d)).reduce((s,l)=>s+l.mins,0)/60}));
+ for(let k=0;k<6;k++){const d=new Date(ws);d.setDate(d.getDate()+k);const L=S.log.filter(l=>l.date===ds(d)),h=L.reduce((s,l)=>s+l.mins,0)/60;w+=`<tr><td>${d.toLocaleDateString('en-GB',{weekday:'short',day:'2-digit',month:'short'})}</td><td class="r">${L.length}</td><td class="r">${L.filter(l=>l.done).length}</td><td class="r">${h.toFixed(1)}</td><td style="width:40%"><div class="bar"><i style="width:${h/mxH*100}%"></i></div></td></tr>`}$('week').innerHTML=w+'</table>';
+ const st={};I.forEach(i=>st[i.status]=(st[i.status]||0)+1);$('stat').innerHTML='<table>'+['Not Started','In Progress','Delayed','Completed'].map(s=>`<tr><td><span class="pill ${s.replace(' ','')}">${s}</span></td><td class="r">${st[s]||0}</td></tr>`).join('')+'</table>';
+ const grp=(key,list)=>'<table><tr><th>Name</th><th class="r">Tasks</th><th class="r">Done</th><th class="r">Hours</th><th class="r">Overdue</th></tr>'+list.map(n=>{const T=S.tasks.filter(x=>x[key]===n);if(!T.length)return '';const ii=T.map(taskInfo);return `<tr><td>${esc(n)}</td><td class="r">${T.length}</td><td class="r">${ii.filter(i=>i.status==='Completed').length}</td><td class="r">${ii.reduce((s,i)=>s+i.hrs,0).toFixed(1)}</td><td class="r">${ii.filter(i=>i.status==='Delayed').length}</td></tr>`}).join('')+'</table>';
+ $('byP').innerHTML=grp('proj',S.projects);$('byD').innerHTML=grp('dept',S.depts)}
+function drawLog(){const f=$('lf').value,t=$('lt').value,q=norm($('lq').value);const L=S.log.filter(l=>(!f||l.date>=f)&&(!t||l.date<=t)&&(!q||norm(l.task+' '+l.remarks).includes(q))).sort((a,b)=>a.date<b.date?1:-1);
+ $('logTbl').innerHTML='<div style="overflow:auto;max-height:560px"><table><tr><th>Date</th><th>Task</th><th>Project</th><th>Department</th><th class="r">Mins</th><th>Finished?</th><th>Remarks</th></tr>'+L.map(l=>{const tk=tInfo(l.task);return `<tr><td>${fmtD(l.date)}</td><td>${esc(l.task)}</td><td>${esc(tk.proj||'')}</td><td>${esc(tk.dept||'')}</td><td class="r">${l.mins}</td><td>${l.done?'Yes':'No'}</td><td>${esc(l.remarks)}</td></tr>`}).join('')+'</table></div>'}
+function drawAll(){drawToday();drawTasks();drawDash();drawLog();drawTodo();drawCmp()}
+$('addTask').onclick=()=>{const n=$('nTask').value.trim();if(!n)return;if(S.tasks.find(t=>norm(t.name)===norm(n))){alert('This task already exists');return}S.tasks.push({name:n,proj:$('nProj').value,dept:$('nDept').value,due:$('nDue').value,keywords:''});$('nTask').value='';save();drawAll()};
+$('addP').onclick=()=>{const n=$('nP').value.trim();if(n&&!S.projects.includes(n)){S.projects.push(n);save();drawAll()}$('nP').value=''};$('addD').onclick=()=>{const n=$('nD').value.trim();if(n&&!S.depts.includes(n)){S.depts.push(n);save();drawAll()}$('nD').value=''};
+['tq','tst'].forEach(i=>$(i).oninput=drawTasks);['lf','lt','lq'].forEach(i=>$(i).oninput=drawLog);$('logDate').onchange=drawToday;
+document.querySelectorAll('#nav button').forEach(b=>b.onclick=()=>{document.querySelectorAll('#nav button').forEach(x=>x.classList.toggle('on',x===b));document.querySelectorAll('main>section').forEach(s=>s.classList.toggle('hide',s.id!=='t-'+b.dataset.t))});
+// ── import her Excel
+const xd=v=>{if(v==null||v==='')return '';if(typeof v==='number')return new Date(Date.UTC(1899,11,30)+Math.round(v)*864e5).toISOString().slice(0,10);if(v instanceof Date)return ds(v);const m=/(\d{4})-(\d{2})-(\d{2})/.exec(String(v));return m?m[0]:''};
+$('imp').onchange=async e=>{const f=e.target.files[0];if(!f)return;if(!window.XLSX){$('impMsg').textContent='Excel reader not loaded: check the internet connection';return}
+ try{const wb=XLSX.read(await f.arrayBuffer(),{type:'array'});const rows=n=>wb.Sheets[n]?XLSX.utils.sheet_to_json(wb.Sheets[n],{header:1,raw:true,defval:''}):[];
+  const P=rows('Project Summary').slice(1).map(r=>String(r[0]).trim()).filter(Boolean),Dp=rows('Department Summary').slice(1).map(r=>String(r[0]).trim()).filter(Boolean);
+  const T=rows('Task List').slice(1).filter(r=>String(r[0]).trim()).map(r=>({name:String(r[0]).trim(),proj:String(r[1]).trim()||'General',dept:String(r[2]).trim(),due:xd(r[3]),keywords:''}));
+  const L=rows('Daily Log').slice(1).filter(r=>xd(r[0])&&String(r[1]).trim()).map(r=>({id:uid(),date:xd(r[0]),task:String(r[1]).trim(),mins:+r[4]||0,done:/^y/i.test(String(r[6])),remarks:String(r[8]||'').trim(),source:'excel'}));
+  if(!T.length&&!L.length)throw new Error('No Task List or Daily Log found');
+  if((S.tasks.length||S.log.length)&&!confirm('Replace what is in the app now with the file?'))return;
+  S.tasks=T;S.log=L;S.projects=P.length?P:S.projects;S.depts=Dp.length?Dp:S.depts;save();drawAll();$('impMsg').textContent=`Loaded ${T.length} tasks, ${L.length} log entries, ${S.projects.length} projects, ${S.depts.length} departments.`}catch(err){$('impMsg').textContent='Could not read the file: '+err.message}e.target.value=''};
+// ── export
+$('exp').onclick=()=>{if(!window.XLSX){alert('Excel writer not loaded: check the internet connection');return}const wb=XLSX.utils.book_new();
+ const dl=[['Date','Task','Project','Department','Mins Spent','Hours','Finished?','Task Status','Remarks']].concat(S.log.slice().sort((a,b)=>a.date<b.date?-1:1).map(l=>{const t=tInfo(l.task);return [l.date,l.task,t.proj||'',t.dept||'',l.mins,+(l.mins/60).toFixed(2),l.done?'Yes':'No',t.name?taskInfo(t).status:'',l.remarks]}));
+ const tl=[['Task','Project','Department','Due Date','Started','Last Worked','Completed','Days Taken','Days Overdue','Total Hrs','Status']].concat(S.tasks.map(t=>{const i=taskInfo(t);return [t.name,t.proj,t.dept,t.due,i.started,i.last,i.completed,i.days,i.over,+i.hrs.toFixed(2),i.status]}));
+ const sum=(key,list,h)=>[[h,'Total Tasks','Completed','Pending','Progress %','Total Hours','Overdue (Open)']].concat(list.map(n=>{const T=S.tasks.filter(x=>x[key]===n),ii=T.map(taskInfo),c=ii.filter(i=>i.status==='Completed').length;return [n,T.length,c,T.length-c,T.length?Math.round(c/T.length*100)+'%':'',+ii.reduce((s,i)=>s+i.hrs,0).toFixed(2),ii.filter(i=>i.status==='Delayed').length]}));
+ const I=S.tasks.map(taskInfo),t=today(),LT=S.log.filter(l=>l.date===t);
+ const db=[['CEO Dashboard','as of '+t],[],['Tasks worked today',new Set(LT.map(l=>l.task)).size],['Hours today',+(LT.reduce((s,l)=>s+l.mins,0)/60).toFixed(2)],['Open tasks',I.filter(i=>i.status!=='Completed').length],['Delayed',I.filter(i=>i.status==='Delayed').length],['Completed (all time)',I.filter(i=>i.status==='Completed').length]];
+ [['Dashboard',db],['Daily Log',dl],['Task List',tl],['To-do',[['To-do','Task','Planned for','Done','Done on']].concat(S.todos.map(t=>[t.text,t.task,t.plan,t.done?'Yes':'No',t.doneDate]))],['Project Summary',sum('proj',S.projects,'Project')],['Department Summary',sum('dept',S.depts,'Department')]].forEach(([n,a])=>{const ws=XLSX.utils.aoa_to_sheet(a);ws['!cols']=a[0].map((_,i)=>({wch:i===0?34:i===8?50:16}));XLSX.utils.book_append_sheet(wb,ws,n)});
+ XLSX.writeFile(wb,'Daily-Task-Tracker-'+t+'.xlsx')};
+// ── app-only stage: email comparison appears once the app runs in Google with Gmail connected
+{const b=document.querySelector('#nav button[data-t=cmp]');b.style.display='none';
+ $('t-data').insertAdjacentHTML('beforeend','<div class="card"><h2>Backup</h2><p class="note">Download a copy of all your data (tasks, log, to-dos, projects, departments). The same file restores it here or in any future version of the app, without loss.</p><button class="btn" id="bk2">Download backup</button> <input type="file" id="rs2" accept=".json"> <span class="small" id="rs2Msg"></span></div>');
+ $('bk2').onclick=()=>{const {email,me,sheetUrl,...data}=S;const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(data)],{type:'application/json'}));a.download='Task-Tracker-backup-'+today()+'.json';a.click()};
+ $('rs2').onchange=async e=>{const f=e.target.files[0];if(!f)return;try{const x=JSON.parse(await f.text());if(!x.tasks||!x.log)throw 0;if(confirm('Replace the data in this browser with the backup?')){S={...S,...x};save();drawAll();$('rs2Msg').textContent='Restored.'}}catch(err){$('rs2Msg').textContent='Not a valid backup file'}e.target.value=''};
+ document.querySelector('#t-data .card:nth-of-type(3)').style.display='none';
+ document.querySelector('footer').textContent=FB_ON?'Your data is stored securely in the company database; only you can see it. Download a backup now and then.':'Demo mode: data kept in this browser only.';
+ document.querySelector('.hd .s').textContent='Plan · speak · log';}
+// ── start
+$('logDate').value=today();$('cDate').value=today();
+function boot(){api('getAll').then(d=>{if(d&&Object.keys(d).length){S={...S,...d,projects:d.projects&&d.projects.length?d.projects:S.projects,depts:d.depts&&d.depts.length?d.depts:S.depts}}S.tasks.forEach(t=>{if(!t.id)t.id=uid()});$('saved').textContent='Ready';drawAll()}).catch(e=>{$('saved').textContent='Could not load: '+(e&&e.message||e);drawAll()})}
+if(!FB_ON){$('demo').style.display='block';boot()}
+else{firebase.initializeApp(FIREBASE_CONFIG);const auth=firebase.auth();
+ $('gin').onclick=()=>{const p=new firebase.auth.GoogleAuthProvider();p.setCustomParameters({prompt:'select_account'});auth.signInWithPopup(p).catch(e=>$('lmsg').textContent='Sign-in failed: '+e.message)};
+ $('out').onclick=()=>auth.signOut();
+ auth.onAuthStateChanged(u=>{if(!u){USER=null;$('login').style.display='grid';$('who').textContent='';$('out').style.display='none';return}
+  const dom=(u.email||'').split('@')[1]||'';if(!ALLOWED_DOMAINS.includes(dom.toLowerCase())){$('lmsg').textContent='Please use your company account ('+ALLOWED_DOMAINS.join(', ')+').';auth.signOut();return}
+  USER=u;DBR=firebase.database().ref('users/'+u.uid);DBR.child('profile').set({name:u.displayName||'',email:u.email,last:Date.now()});
+  $('login').style.display='none';$('who').textContent=u.displayName||u.email;$('out').style.display='inline-block';boot()})}
+if('serviceWorker' in navigator&&location.protocol==='https:')navigator.serviceWorker.register('sw.js').catch(()=>{});
+</script></body></html>
