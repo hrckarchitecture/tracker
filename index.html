@@ -4,98 +4,164 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <style>
-:root{--bg:#F6F7F9;--panel:#fff;--ink:#26303D;--muted:#6B7685;--line:#E3E7ED;--navy:#1C3557;--gold:#C9A84C;--soft:#EEF2F7;--good:#2E8B6A;--warn:#C27C0E;--bad:#C0392B;color-scheme:light}
-*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 "Segoe UI",system-ui,-apple-system,Arial,sans-serif}
-header{background:#fff;border-bottom:1px solid var(--line)}.hd{max-width:1100px;margin:0 auto;padding:12px 18px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
-.hd h1{font:400 21px Georgia,serif;color:var(--navy);margin:0}.hd .s{font-size:12.5px;color:var(--muted)}
-nav{max-width:1100px;margin:0 auto;padding:0 18px;display:flex;gap:2px;flex-wrap:wrap}nav button{font:inherit;border:none;background:none;padding:9px 14px;color:var(--muted);cursor:pointer;border-bottom:3px solid transparent}nav button.on{color:var(--navy);font-weight:600;border-bottom-color:var(--gold)}
-main{max-width:1100px;margin:0 auto;padding:18px}
-.card{background:#fff;border:1px solid var(--line);border-radius:12px;padding:16px 18px;margin-bottom:14px}
-h2{font-size:16.5px;color:var(--navy);margin:0 0 6px}.note{font-size:12.5px;color:var(--muted);margin:0 0 10px}
-.btn{font:inherit;padding:8px 14px;border-radius:8px;border:1px solid var(--line);background:#fff;color:var(--ink);cursor:pointer}.btn.p{background:var(--navy);color:#fff;border-color:var(--navy)}.btn.g{background:var(--gold);border-color:var(--gold);color:#1f1f1f}.btn:disabled{opacity:.5;cursor:default}
-.mic{width:84px;height:84px;border-radius:50%;border:none;background:var(--navy);color:#fff;font-size:34px;cursor:pointer;box-shadow:0 4px 14px rgba(28,53,87,.25)}.mic.rec{background:var(--bad);animation:pulse 1.2s infinite}@keyframes pulse{50%{box-shadow:0 0 0 14px rgba(192,57,43,.12)}}
-.vrow{display:flex;gap:18px;align-items:center;flex-wrap:wrap}
-textarea,input,select{font:inherit;padding:7px 10px;border:1px solid var(--line);border-radius:8px;background:#fff;color:var(--ink)}textarea{width:100%;min-height:74px}
-table{width:100%;border-collapse:collapse;font-size:13.5px}th{text-align:left;color:var(--navy);background:var(--soft);font-weight:600;padding:7px 9px;border-bottom:1px solid var(--line);white-space:nowrap}td{padding:6px 9px;border-bottom:1px solid var(--line);vertical-align:top}td.r,th.r{text-align:right}
-td input,td select{width:100%;padding:5px 7px}
-.pill{display:inline-block;padding:1px 9px;border-radius:10px;font-size:12px;font-weight:600;white-space:nowrap}.Completed{background:#E5F4EE;color:var(--good)}.InProgress{background:#E8EEF7;color:var(--navy)}.Delayed{background:#FBE7E5;color:var(--bad)}.NotStarted{background:#F1F3F6;color:var(--muted)}
-.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:14px}.tile{background:#fff;border:1px solid var(--line);border-top:3px solid var(--navy);border-radius:12px;padding:12px 14px}.tile .k{font-size:12px;color:var(--muted)}.tile .v{font:400 26px Georgia,serif;color:var(--navy)}
-.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,480px),1fr));gap:14px}
-.warn{background:#FFF8EA;border:1px solid #F0D9A6;border-radius:8px;padding:8px 10px;font-size:13px;margin:8px 0}
-.new{background:#FFFCF3}.hide{display:none}.small{font-size:12px;color:var(--muted)}
-.bar{height:10px;border-radius:5px;background:var(--soft);overflow:hidden}.bar i{display:block;height:100%;background:var(--navy)}
-footer{max-width:1100px;margin:0 auto;padding:4px 18px 26px;font-size:12px;color:var(--muted)}
-.todo{display:flex;gap:8px;align-items:flex-start;padding:7px 0;border-bottom:1px solid var(--line)}.todo input[type=checkbox]{width:18px;height:18px;margin-top:2px}.todo .tx{flex:1}.todo.dn .tx{text-decoration:line-through;color:var(--muted)}
-.bk{border:1px solid var(--line);border-radius:12px;padding:12px 14px;background:#fff}.bk h3{margin:0 0 6px;font-size:14.5px;color:var(--navy)}.cnt{color:var(--muted);font-weight:400;font-size:12.5px}
-.carry{font-size:11.5px;color:var(--warn);font-weight:600}.grid3{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:12px}
-.cmp h3{font-size:14.5px;margin:0 0 6px}.cmp .ok{border-left:4px solid var(--good)}.cmp .add{border-left:4px solid var(--gold)}.cmp .info{border-left:4px solid #B9C2CE}
-.em{font-size:12.5px;color:var(--muted)}.em a{color:var(--navy2,#3B5B85)}.src{font-size:11px;color:var(--muted)}
+:root{--ink:#172338;--ink2:#2B3A55;--slate:#5B6678;--mist:#8A94A6;--line:#E4E8EF;--line2:#EEF1F6;--paper:#F5F7FA;--panel:#FFFFFF;--brass:#B8892E;--brass2:#F5ECD9;--blue:#2F6FBF;--blue2:#E7EFFA;--green:#1F8A64;--green2:#E4F3EC;--amber:#B7791F;--amber2:#FBF0DD;--red:#C2412D;--red2:#FBE8E4;--r:14px;color-scheme:light}
+*{box-sizing:border-box}html,body{height:100%}
+body{margin:0;background:var(--paper);color:var(--ink);font:15px/1.55 Manrope,"Segoe UI",system-ui,-apple-system,Arial,sans-serif;font-variant-numeric:tabular-nums;-webkit-font-smoothing:antialiased}
+button,input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+/* shell */
+.app{display:grid;grid-template-columns:232px 1fr;min-height:100vh}
+aside{background:var(--panel);border-right:1px solid var(--line);padding:22px 14px;position:sticky;top:0;height:100vh;display:flex;flex-direction:column;gap:18px}
+.brand{display:flex;gap:10px;align-items:center;padding:0 8px}.brand .mk{width:34px;height:34px;border-radius:9px;background:var(--ink);display:grid;place-items:center}
+.brand b{font-size:15.5px;letter-spacing:-.01em}.brand span{display:block;font-size:12px;color:var(--mist);font-weight:500}
+#nav{display:flex;flex-direction:column;gap:2px}
+#nav button{display:flex;align-items:center;gap:11px;width:100%;border:none;background:none;padding:9px 10px;border-radius:9px;color:var(--slate);font-weight:600;font-size:14px;cursor:pointer;text-align:left}
+#nav button svg{width:18px;height:18px;flex:0 0 18px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+#nav button:hover{background:var(--line2);color:var(--ink)}#nav button.on{background:var(--ink);color:#fff}
+.me{margin-top:auto;border-top:1px solid var(--line);padding:14px 8px 0;font-size:12.5px;color:var(--slate)}.me #who{font-weight:700;color:var(--ink);display:block}.me #saved{display:block;color:var(--mist);margin:2px 0 8px}
+footer{font-size:11.5px;color:var(--mist);line-height:1.45}
+main{padding:28px 34px 110px;max-width:1180px;width:100%}
+.ph{display:flex;align-items:flex-end;gap:16px;flex-wrap:wrap;margin-bottom:20px}.ph h1{font-size:27px;line-height:1.15;letter-spacing:-.02em;margin:0;font-weight:800}.ph p{margin:4px 0 0;color:var(--slate);font-size:14px}.ph .act{margin-left:auto;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+/* surfaces */
+.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:18px 20px;margin-bottom:16px}
+h2{font-size:15.5px;font-weight:700;margin:0 0 4px;letter-spacing:-.01em}.note{font-size:13px;color:var(--slate);margin:0 0 12px}.small{font-size:12.5px;color:var(--mist)}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,430px),1fr));gap:16px}.grid3{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:14px}
+/* controls */
+.btn{border:1px solid var(--line);background:#fff;border-radius:10px;padding:8px 14px;font-weight:600;font-size:13.5px;cursor:pointer;color:var(--ink)}.btn:hover{border-color:#cdd4df}
+.btn.p{background:var(--ink);border-color:var(--ink);color:#fff}.btn.p:hover{background:var(--ink2)}.btn.g{background:var(--brass);border-color:var(--brass);color:#fff}.btn:disabled{opacity:.45;cursor:default}
+input,select,textarea{border:1px solid var(--line);border-radius:10px;padding:8px 11px;background:#fff;font-size:14px}input:focus,select:focus,textarea:focus{border-color:#9DB4D6;outline:none;box-shadow:0 0 0 3px var(--blue2)}
+textarea{width:100%;min-height:96px;resize:vertical;line-height:1.5}
+/* stats */
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:16px}
+.tile{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:14px 16px}.tile .k{font-size:12.5px;color:var(--slate);font-weight:600}.tile .v{font-size:28px;font-weight:800;letter-spacing:-.02em;line-height:1.2;margin-top:2px}.tile .small{font-size:12px}
+/* the day ribbon: the signature element */
+.ribbon{background:var(--panel);border:1px solid var(--line);color:var(--ink);border-radius:18px;padding:20px 22px 18px;margin-bottom:16px}
+.rb-top{display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap}.rb-top .d{font-size:13px;color:var(--slate);font-weight:600}.rb-top .h{font-size:34px;font-weight:800;letter-spacing:-.03em}.rb-top .h small{font-size:15px;color:var(--mist);font-weight:600;margin-left:6px}
+.track{position:relative;height:40px;border-radius:10px;background:var(--line2);margin:14px 0 8px;display:flex;overflow:hidden}
+.track i{display:block;height:100%;border-right:2px solid #fff;min-width:3px;position:relative}.track i:last-child{border-right:none}
+.track .goal{position:absolute;top:-4px;bottom:-4px;width:2px;background:var(--brass);left:0}
+.scale{display:flex;justify-content:space-between;font-size:11.5px;color:var(--mist)}
+.rb-legend{display:flex;flex-wrap:wrap;gap:6px 14px;margin-top:10px;font-size:12.5px;color:var(--slate)}.rb-legend span{display:inline-flex;align-items:center;gap:6px}.rb-legend em{width:9px;height:9px;border-radius:3px;display:inline-block}
+.rb-plan{display:flex;gap:18px;flex-wrap:wrap;margin-top:12px;padding-top:12px;border-top:1px solid var(--line2);font-size:13px;color:var(--slate)}.rb-plan b{color:var(--ink);font-size:15px}
+/* capture */
+.vrow{display:flex;gap:18px;align-items:flex-start;flex-wrap:wrap}
+.mic{width:72px;height:72px;border-radius:50%;border:none;background:var(--brass);color:#fff;cursor:pointer;display:grid;place-items:center;flex:0 0 72px;box-shadow:0 6px 18px rgba(184,137,46,.35);transition:transform .15s}
+.mic svg{width:30px;height:30px;stroke:#fff;fill:none;stroke-width:2;stroke-linecap:round}.mic:hover{transform:scale(1.04)}
+.mic.rec{background:var(--red);box-shadow:0 0 0 0 rgba(194,65,45,.5);animation:pulse 1.4s infinite}@keyframes pulse{70%{box-shadow:0 0 0 16px rgba(194,65,45,0)}100%{box-shadow:0 0 0 0 rgba(194,65,45,0)}}
+.fab{position:fixed;right:26px;bottom:26px;z-index:30;width:60px;height:60px;flex-basis:60px}
+.hint{font-size:12.5px;color:var(--slate);background:var(--line2);border-radius:10px;padding:8px 11px;margin-top:10px}
+/* tables */
+table{width:100%;border-collapse:collapse;font-size:13.5px}th{text-align:left;color:var(--slate);font-weight:600;font-size:12.5px;padding:9px 10px;border-bottom:1px solid var(--line);white-space:nowrap;background:#FAFBFD}
+td{padding:9px 10px;border-bottom:1px solid var(--line2);vertical-align:top}tr:last-child td{border-bottom:none}td.r,th.r{text-align:right}td input,td select{width:100%;padding:6px 8px;font-size:13px}
+.pill{display:inline-block;padding:2px 10px;border-radius:999px;font-size:12px;font-weight:700;white-space:nowrap}
+.Completed{background:var(--green2);color:var(--green)}.InProgress{background:var(--blue2);color:var(--blue)}.Delayed{background:var(--red2);color:var(--red)}.NotStarted{background:var(--line2);color:var(--slate)}
+.new{background:#FFFCF4}
+/* to-do */
+.bk{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:14px 16px}.bk h3{margin:0 0 6px;font-size:14.5px;font-weight:700;display:flex;justify-content:space-between}.cnt{color:var(--mist);font-weight:600;font-size:12.5px}
+.todo{display:flex;gap:10px;align-items:flex-start;padding:9px 0;border-bottom:1px solid var(--line2)}.todo:last-child{border-bottom:none}
+.todo input[type=checkbox]{appearance:none;width:19px;height:19px;border:1.8px solid #B9C2D0;border-radius:6px;margin-top:2px;cursor:pointer;flex:0 0 19px;display:grid;place-items:center}
+.todo input[type=checkbox]:checked{background:var(--green);border-color:var(--green)}.todo input[type=checkbox]:checked::after{content:"";width:5px;height:9px;border:solid #fff;border-width:0 2px 2px 0;transform:rotate(45deg) translate(-1px,-1px)}
+.todo .tx{flex:1;font-size:14px}.todo.dn .tx{text-decoration:line-through;color:var(--mist)}.todo .btn{padding:2px 8px;border:none;color:var(--mist);background:none}
+.carry{font-size:11.5px;color:var(--amber);font-weight:700;background:var(--amber2);border-radius:999px;padding:1px 8px;margin-left:4px}
+/* evidence */
+.cmp .card{margin:0}.cmp .ok{box-shadow:inset 3px 0 0 var(--green)}.cmp .add{box-shadow:inset 3px 0 0 var(--brass)}.cmp .info{box-shadow:inset 3px 0 0 #C7CFDB}
+.cmp h3{font-size:14.5px;margin:0 0 8px;font-weight:700}.em{font-size:12.5px;color:var(--slate);margin:2px 0}.em a{color:var(--blue);text-decoration:none}.em a:hover{text-decoration:underline}
+.src{display:inline-block;font-size:10.5px;font-weight:800;border-radius:5px;padding:0 5px;margin-right:4px;vertical-align:1px}.src.e{background:var(--blue2);color:var(--blue)}.src.w{background:var(--green2);color:var(--green)}
+.conn{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,330px),1fr));gap:14px;margin-bottom:16px}.conn .card{margin:0}.conn .st{font-size:12.5px;color:var(--slate);margin-top:8px}
+.bar{height:8px;border-radius:5px;background:var(--line2);overflow:hidden}.bar i{display:block;height:100%;background:var(--ink)}
+.warn{background:var(--amber2);border-radius:10px;padding:9px 12px;font-size:13px;margin:8px 0}
+.hide{display:none!important}
+#login{display:none;position:fixed;inset:0;background:var(--paper);z-index:50;place-items:center;padding:20px}
+.lg{background:var(--panel);border:1px solid var(--line);border-radius:20px;padding:36px 34px;max-width:420px;width:100%}.lg h1{font-size:26px;font-weight:800;letter-spacing:-.02em;margin:16px 0 6px}
+#demo{display:none;background:var(--amber2);padding:7px 18px;font-size:12.5px;text-align:center}
+/* phone */
+@media (max-width:860px){.app{display:block}aside{position:fixed;bottom:0;left:0;right:0;top:auto;height:auto;flex-direction:row;padding:6px 6px calc(6px + env(safe-area-inset-bottom));z-index:40;border-right:none;border-top:1px solid var(--line);gap:0}
+ .brand,.me{display:none}#nav{flex-direction:row;width:100%;justify-content:space-between;overflow-x:auto}#nav button{flex-direction:column;gap:3px;font-size:10.5px;padding:6px 6px;min-width:58px;align-items:center;text-align:center}#nav button.on{background:var(--line2);color:var(--ink)}
+ main{padding:18px 14px 120px}.ph h1{font-size:22px}.fab{bottom:86px;right:16px}.mtop{display:flex!important}}
+.mtop{display:none;justify-content:space-between;align-items:center;padding:12px 14px 0;font-size:12.5px;color:var(--slate)}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style></head><body>
-<header><div class="hd"><div><h1>Daily Task Tracker</h1><div class="s">Plan · speak · log · checked against your emails</div></div><div style="margin-left:auto;display:flex;gap:12px;align-items:center"><span class="s" id="saved">Loading…</span><span class="s" id="who"></span><button class="btn" id="out" style="display:none;padding:4px 10px">Sign out</button></div></div>
-<nav id="nav"><button data-t="today" class="on">Today</button><button data-t="todo">To-do</button><button data-t="cmp">Voice vs email</button><button data-t="tasks">Tasks</button><button data-t="dash">Dashboard</button><button data-t="log">Daily log</button><button data-t="data">Import / export</button></nav></header>
-<div id="login" style="display:none;position:fixed;inset:0;background:#F6F7F9;z-index:50;place-items:center"><div class="card" style="max-width:420px;text-align:center;padding:30px"><h1 style="font:400 26px Georgia,serif;color:#1C3557;margin:0 0 6px">Daily Task Tracker</h1><p class="note">Sign in with your company Google account.</p><button class="btn p" id="gin" style="padding:10px 18px">Sign in with Google</button><p class="small" id="lmsg" style="margin-top:12px"></p></div></div>
-<div id="demo" style="display:none;background:#FFF8EA;border-bottom:1px solid #F0D9A6;padding:6px 18px;font-size:12.5px;text-align:center">Demo mode: the Firebase settings are not filled in yet, so data is kept only in this browser.</div>
+<div id="login"><div class="lg"><div class="brand" style="padding:0"><div class="mk"><svg style="width:20px;height:20px;stroke:#B8892E;fill:none;stroke-width:2" viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="3"/><path d="m8.5 12 2.5 2.5 4.5-5"/></svg></div></div><h1>Daily Task Tracker</h1><p class="note">Plan your day, log it by voice, and see it checked against your emails. Sign in with your company Google account.</p><button class="btn p" id="gin" style="width:100%;padding:11px">Sign in with Google</button><p class="small" id="lmsg" style="margin-top:12px"></p></div></div>
+<div id="demo">Demo mode: the Firebase settings are not filled in, so data is kept only in this browser.</div>
+<div class="app">
+<aside><div class="brand"><div class="mk"><svg style="width:19px;height:19px;stroke:#B8892E;fill:none;stroke-width:2" viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="3"/><path d="m8.5 12 2.5 2.5 4.5-5"/></svg></div><div><b>Task Tracker</b><span>CK Architecture</span></div></div>
+<nav id="nav"><button data-t="today" class="on"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v2M12 19v2M5 12H3M21 12h-2M6.3 6.3 4.9 4.9M19.1 19.1l-1.4-1.4M17.7 6.3l1.4-1.4M4.9 19.1l1.4-1.4"/><circle cx="12" cy="12" r="4"/></svg>Today</button><button data-t="todo"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="3"/><path d="m8.5 12 2.5 2.5 4.5-5"/></svg>To-do</button><button data-t="cmp"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16v12H4z"/><path d="m4 7 8 6 8-6"/></svg>Check</button><button data-t="tasks"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6h11M9 12h11M9 18h11"/><circle cx="4.5" cy="6" r="1"/><circle cx="4.5" cy="12" r="1"/><circle cx="4.5" cy="18" r="1"/></svg>Tasks</button><button data-t="dash"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>Insights</button><button data-t="log"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h9l4 4v14H6z"/><path d="M14 3v5h5M9 13h7M9 17h7"/></svg>Log</button><button data-t="data"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg>Data</button></nav>
+<div class="me"><span id="who"></span><span id="saved">Loading…</span><button class="btn" id="out" style="display:none;padding:5px 10px;font-size:12.5px">Sign out</button><footer style="margin-top:12px"></footer></div></aside>
+<div><div class="mtop"><span id="whoM"></span><span id="savedM"></span></div>
 <main>
 <section id="t-today">
- <div class="tiles" id="pvTiles"></div>
- <div class="card"><h2>Speak or type</h2><p class="note">Work done: <i>"CK website update, two hours, updated the fast track project, finished."</i> · Plans: <i>"Tomorrow: call Etisalat about the licence. Next week: Procore renewal."</i> If the microphone is blocked, press <b>Windows + H</b> (or the microphone on your phone keyboard) and speak into the box.</p>
-  <div class="vrow"><button class="mic" id="mic" title="Speak">🎤</button><div style="flex:1;min-width:260px"><textarea id="said" placeholder="Your words appear here (you can also type or correct them)"></textarea>
-  <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap;align-items:center"><label class="small">Date <input type="date" id="logDate"></label><button class="btn p" id="read">Read into entries</button><button class="btn" id="clear">Clear</button><span class="small" id="micState"></span></div></div></div>
+ <div class="ph"><div><h1 id="greet">Today</h1><p id="dayLbl2"></p></div></div>
+ <div class="ribbon" id="ribbon"></div>
+ <div class="card"><h2>Tell the tracker what you did, or what is next</h2><p class="note">Speak naturally: "CK website update, two hours, updated the fast track project, finished. Tomorrow: call Etisalat about the licence."</p>
+  <div class="vrow"><button class="mic" id="mic" title="Speak" aria-label="Start speaking"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21"/></svg></button><div style="flex:1;min-width:250px"><textarea id="said" placeholder="Your words appear here. You can also type or correct them."></textarea>
+  <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;align-items:center"><input type="date" id="logDate" aria-label="Date"><button class="btn p" id="read">Turn into entries</button><button class="btn" id="clear">Clear</button><span class="small" id="micState"></span></div>
+  <div class="hint">If the microphone does not respond, press <b>Windows + H</b> in the box (or the microphone on your phone keyboard) and speak.</div></div></div>
   <div id="draft"></div></div>
- <div class="grid2"><div class="card"><h2>To-do today</h2><div id="todayTodos"></div></div><div class="card"><h2>Logged for <span id="dayLbl"></span></h2><div id="todayTbl"></div></div></div>
+ <div class="grid2"><div class="card"><h2>Planned for today</h2><div id="todayTodos"></div></div><div class="card"><h2>Logged · <span id="dayLbl"></span></h2><div id="todayTbl"></div></div></div>
+ <div class="tiles hide" id="pvTiles"></div>
 </section>
 <section id="t-todo" class="hide">
- <div class="card"><h2>Add a to-do</h2><div style="display:flex;gap:8px;flex-wrap:wrap"><input id="tdText" placeholder="What needs doing" style="flex:2;min-width:220px"><select id="tdWhen"><option value="today">Today</option><option value="tomorrow">Tomorrow</option><option value="thisweek">This week</option><option value="nextweek">Next week</option><option value="thismonth">This month</option><option value="later">Later</option><option value="date">On a date…</option></select><input type="date" id="tdDate" class="hide"><select id="tdTask"></select><button class="btn p" id="tdAdd">Add</button></div><p class="small" style="margin:6px 0 0">Unfinished to-dos move forward automatically and are marked "carried over".</p></div>
+ <div class="ph"><div><h1>To-do</h1><p>Plan ahead. Anything unfinished moves forward on its own.</p></div></div>
+ <div class="card"><div style="display:flex;gap:8px;flex-wrap:wrap"><input id="tdText" placeholder="What needs doing?" style="flex:2;min-width:220px"><select id="tdWhen"><option value="today">Today</option><option value="tomorrow">Tomorrow</option><option value="thisweek">This week</option><option value="nextweek">Next week</option><option value="thismonth">This month</option><option value="later">Later</option><option value="date">On a date</option></select><input type="date" id="tdDate" class="hide"><select id="tdTask"></select><button class="btn p" id="tdAdd">Add to-do</button></div></div>
  <div class="grid3" id="buckets"></div>
 </section>
 <section id="t-cmp" class="hide">
- <div class="card" style="display:flex;gap:12px;align-items:center;flex-wrap:wrap"><h2 style="margin:0">Voice / typed log vs emails</h2><input type="date" id="cDate"><button class="btn" id="scan">Check emails now</button><span class="small" id="scanMsg"></span></div>
- <p class="note">Emails are read every evening at 19:00 (subject, contact and date only: no email text). They show activity, not time: minutes always come from your own entry.</p>
+ <div class="ph"><div><h1>Check</h1><p>Your log, side by side with your emails and WhatsApp. Emails show activity, not time.</p></div><div class="act"><input type="date" id="cDate"></div></div>
+ <div class="conn">
+  <div class="card"><h2><span class="src e">EMAIL</span> Gmail</h2><p class="note">Reads subject, contact and date of your own work emails, never the text.</p><button class="btn p" id="scan">Check my emails</button><div class="st" id="scanMsg"></div></div>
+  <div class="card"><h2><span class="src w">CHAT</span> WhatsApp</h2><p class="note">In a work chat: ⋮ → More → Export chat → Without media. Then load the file here.</p><input type="file" id="waFile" accept=".txt,.zip"><div class="st" id="waMsg"></div></div>
+ </div>
  <div class="grid3 cmp" id="cmpBox"></div>
 </section>
 <section id="t-tasks" class="hide">
- <div class="card"><h2>Task list</h2><p class="note">Status is automatic. <b>Email keywords</b> help link emails to a task: add names of companies or people, separated by commas (e.g. <i>etisalat, e&amp;</i>).</p>
-  <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px"><input id="nTask" placeholder="New task" style="flex:2;min-width:200px"><select id="nProj"></select><select id="nDept"></select><input type="date" id="nDue"><button class="btn p" id="addTask">Add task</button></div>
-  <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px"><input id="tq" placeholder="Search" style="flex:1;min-width:160px"><select id="tst"><option value="">All statuses</option><option>Not Started</option><option>In Progress</option><option>Delayed</option><option>Completed</option></select></div>
+ <div class="ph"><div><h1>Tasks</h1><p>Status updates itself from your log. Keywords help match emails and chats to a task.</p></div></div>
+ <div class="card"><div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px"><input id="nTask" placeholder="New task" style="flex:2;min-width:200px"><select id="nProj"></select><select id="nDept"></select><input type="date" id="nDue"><button class="btn p" id="addTask">Add task</button></div>
+  <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px"><input id="tq" placeholder="Search tasks" style="flex:1;min-width:160px"><select id="tst"><option value="">All statuses</option><option>Not Started</option><option>In Progress</option><option>Delayed</option><option>Completed</option></select></div>
   <div id="taskTbl"></div></div>
- <div class="grid2"><div class="card"><h2>Projects</h2><div style="display:flex;gap:8px"><input id="nP" placeholder="Add project"><button class="btn" id="addP">Add</button></div><p class="small" id="pList"></p></div>
- <div class="card"><h2>Departments</h2><div style="display:flex;gap:8px"><input id="nD" placeholder="Add department"><button class="btn" id="addD">Add</button></div><p class="small" id="dList"></p></div></div>
+ <div class="grid2"><div class="card"><h2>Projects</h2><div style="display:flex;gap:8px;margin:8px 0"><input id="nP" placeholder="Add project" style="flex:1"><button class="btn" id="addP">Add</button></div><p class="small" id="pList"></p></div>
+ <div class="card"><h2>Departments</h2><div style="display:flex;gap:8px;margin:8px 0"><input id="nD" placeholder="Add department" style="flex:1"><button class="btn" id="addD">Add</button></div><p class="small" id="dList"></p></div></div>
 </section>
-<section id="t-dash" class="hide"><div class="tiles" id="dTiles"></div><div class="grid2"><div class="card"><h2>This week (Mon to Sat)</h2><div id="week"></div></div><div class="card"><h2>Tasks by status</h2><div id="stat"></div></div></div>
+<section id="t-dash" class="hide"><div class="ph"><div><h1>Insights</h1><p>Where your time goes, and what is open or late.</p></div></div><div class="tiles" id="dTiles"></div><div class="grid2"><div class="card"><h2>This week</h2><div id="week"></div></div><div class="card"><h2>Tasks by status</h2><div id="stat"></div></div></div>
  <div class="grid2"><div class="card"><h2>By project</h2><div id="byP"></div></div><div class="card"><h2>By department</h2><div id="byD"></div></div></div></section>
-<section id="t-log" class="hide"><div class="card"><h2>Daily log (master)</h2><div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px"><input type="date" id="lf"><input type="date" id="lt"><input id="lq" placeholder="Search task or remark"></div><div id="logTbl"></div></div></section>
-<section id="t-data" class="hide"><div class="card"><h2>Import your current Excel tracker</h2><p class="note">Loads Task List, Daily Log, projects and departments from the existing "Daily Task Tracker - CEO Dashboard" file. Do this once to start.</p><input type="file" id="imp" accept=".xlsx"> <span class="small" id="impMsg"></span></div>
- <div class="card"><h2>Export</h2><p class="note">Excel with Dashboard, Daily Log, Task List, To-do, Project Summary and Department Summary.</p><button class="btn g" id="exp">Download Excel</button></div>
- <div class="card"><h2>Where the data is kept</h2><p class="note">In a Google Sheet in your own Google Drive, saved automatically. <a id="sheetLink" target="_blank">Open the data sheet</a></p></div></section>
-</main>
-<footer>Data: your Google Sheet (company account). Emails: subject, contact and date only, from your own mailbox.</footer>
+<section id="t-log" class="hide"><div class="ph"><div><h1>Log</h1><p>Every entry, newest first.</p></div></div><div class="card"><div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px"><input type="date" id="lf"><input type="date" id="lt"><input id="lq" placeholder="Search task or remark" style="flex:1;min-width:160px"></div><div id="logTbl"></div></div></section>
+<section id="t-data" class="hide"><div class="ph"><div><h1>Data</h1><p>Bring in your Excel tracker, export a copy, or keep a backup.</p></div></div>
+ <div class="card"><h2>Import your Excel tracker</h2><p class="note">Loads tasks, log, projects and departments from the "Daily Task Tracker - CEO Dashboard" file. Do this once.</p><input type="file" id="imp" accept=".xlsx"> <span class="small" id="impMsg"></span></div>
+ <div class="card"><h2>Export to Excel</h2><p class="note">Dashboard, Daily Log, Task List, To-do and summaries, in the same layout as your Excel.</p><button class="btn g" id="exp">Download Excel</button></div>
+</section>
+</main></div></div>
+<button class="mic fab" id="fab" title="Speak" aria-label="Log by voice"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21"/></svg></button>
 <script>
 const $=id=>document.getElementById(id);
-let S={tasks:[],log:[],todos:[],projects:['General'],depts:['Marketing','Sales','Operations','Logistic','IT / Admin','Procurement','CEO office',"Cem's Personal",'Project Management'],email:[]};
+let S={wa:[],tasks:[],log:[],todos:[],projects:['General'],depts:['Marketing','Sales','Operations','Logistic','IT / Admin','Procurement','CEO office',"Cem's Personal",'Project Management'],email:[]};
 // ══ CONFIGURATION ═══════════════════════════════════════════════════════════
 // Paste the Firebase web settings here (Firebase console → Project settings → Your apps → Web app → Config).
 const FIREBASE_CONFIG = { apiKey: "AIzaSyB40xEWpk0iPfgUDSCIFDrnGagFauNAtSY", authDomain: "ck-task-tracker-fbe99.firebaseapp.com", databaseURL: "https://ck-task-tracker-fbe99-default-rtdb.europe-west1.firebasedatabase.app", projectId: "ck-task-tracker-fbe99", storageBucket: "ck-task-tracker-fbe99.firebasestorage.app", messagingSenderId: "657336033232", appId: "1:657336033232:web:d5d244ea0d6d2ac5f8a3d5" };
 // Company e-mail domains allowed to sign in (must match the database rules).
 const ALLOWED_DOMAINS = ["ckarchitecture.com"];
+// Email and WhatsApp check: set to true when it is time to switch it on (after the Gmail API is enabled).
+const SHOW_CHECK = false;
 // ════════════════════════════════════════════════════════════════════════════
 // Storage is behind one small "store" layer. Today: Firebase. Later (if chosen): Google Workspace,
 // by swapping this layer only. The data format (tasks, log, todos, projects, depts) is the same everywhere,
 // and "Download backup" / "Restore backup" move it between them without loss.
 const FB_ON = !!(window.firebase && FIREBASE_CONFIG.apiKey && FIREBASE_CONFIG.apiKey !== 'PASTE');
 const LKEY='dtt-v3';let USER=null,DBR=null,LAST={};
-const flat=s=>{const m={};(s.tasks||[]).forEach(x=>m['tasks/'+x.id]=x);(s.log||[]).forEach(x=>m['log/'+x.id]=x);(s.todos||[]).forEach(x=>m['todos/'+x.id]=x);m['lists']={projects:s.projects||[],depts:s.depts||[]};return m};
+const flat=s=>{const m={};(s.email||[]).forEach(x=>m['email/'+x.id]=x);(s.wa||[]).forEach(x=>m['wa/'+x.id]=x);(s.tasks||[]).forEach(x=>m['tasks/'+x.id]=x);(s.log||[]).forEach(x=>m['log/'+x.id]=x);(s.todos||[]).forEach(x=>m['todos/'+x.id]=x);m['lists']={projects:s.projects||[],depts:s.depts||[]};return m};
 const Store={
  async load(){if(!FB_ON){try{return JSON.parse(localStorage.getItem(LKEY))||{}}catch(e){return {}}}
-  const snap=await DBR.once('value');const v=snap.val()||{};const o={tasks:Object.values(v.tasks||{}),log:Object.values(v.log||{}),todos:Object.values(v.todos||{}),projects:(v.lists||{}).projects||[],depts:(v.lists||{}).depts||[],email:Object.values(v.email||{})};
+  const snap=await DBR.once('value');const v=snap.val()||{};const o={tasks:Object.values(v.tasks||{}),log:Object.values(v.log||{}),todos:Object.values(v.todos||{}),projects:(v.lists||{}).projects||[],depts:(v.lists||{}).depts||[],email:Object.values(v.email||{}),wa:Object.values(v.wa||{})};
   o.log.forEach(l=>{l.mins=+l.mins||0;l.done=!!l.done});LAST=Object.fromEntries(Object.entries(flat(o)).map(([k,x])=>[k,JSON.stringify(x)]));return o},
  async saveAll(s){if(!FB_ON){localStorage.setItem(LKEY,JSON.stringify(s));return}
   const now=flat(s),up={};Object.entries(now).forEach(([k,x])=>{const j=JSON.stringify(x);if(LAST[k]!==j)up[k]=x});Object.keys(LAST).forEach(k=>{if(!(k in now))up[k]=null});
   if(Object.keys(up).length)await DBR.update(up);LAST=Object.fromEntries(Object.entries(now).map(([k,x])=>[k,JSON.stringify(x)]))}};
 const api=(fn,...a)=>fn==='getAll'?Store.load():fn==='saveAll'?Store.saveAll(a[0]):Promise.resolve(null);
-const EMAIL_ON=false; // Gmail connection: next stage
+const EMAIL_ON=true;
 const GAS=false;
-let saveT=null;const save=()=>{$('saved').textContent='Saving…';clearTimeout(saveT);saveT=setTimeout(()=>{S.tasks.forEach(t=>{if(!t.id)t.id=uid()});const {email,me,sheetUrl,...data}=S;Store.saveAll(data).then(()=>$('saved').textContent='Saved '+new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'})).catch(e=>$('saved').textContent='Not saved: '+(e&&e.message||e))},500)};
+let saveT=null;const save=()=>{$('saved').textContent='Saving…';clearTimeout(saveT);saveT=setTimeout(()=>{S.tasks.forEach(t=>{if(!t.id)t.id=uid()});const {me,sheetUrl,...data}=S;Store.saveAll(data).then(()=>$('saved').textContent='Saved '+new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'})).catch(e=>$('saved').textContent='Not saved: '+(e&&e.message||e))},500)};
 const ds=d=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
 const today=()=>ds(new Date());const addD=(s,n)=>{const d=new Date(s+'T00:00:00');d.setDate(d.getDate()+n);return ds(d)};
 const fmtD=d=>d?new Date(d+'T00:00:00').toLocaleDateString('en-GB',{day:'2-digit',month:'short'}):'';
@@ -136,12 +202,17 @@ function titleOf(p){const s=cleanRem(p,null).split(',')[0];return s.split(' ').s
 // ── voice
 let rec=null,recOn=false;const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
 if(!SR){$('micState').textContent='Voice not available in this browser: use Chrome or Edge, or type.';$('mic').disabled=true}
-$('mic').onclick=()=>{if(!SR)return;if(recOn){rec.stop();return}rec=new SR();rec.lang='en-GB';rec.continuous=true;rec.interimResults=true;const base=$('said').value?$('said').value.trim()+' ':'';let fin='';
- rec.onresult=e=>{let inter='';for(let i=e.resultIndex;i<e.results.length;i++){if(e.results[i].isFinal)fin+=e.results[i][0].transcript+'. ';else inter+=e.results[i][0].transcript}$('said').value=base+fin+inter};
- rec.onstart=()=>{recOn=true;$('mic').classList.add('rec');$('micState').textContent='Listening… press again to stop'};
- rec.onend=()=>{recOn=false;$('mic').classList.remove('rec');$('micState').textContent='';if($('said').value.trim())readDraft()};
- rec.onerror=e=>{$('micState').textContent=e.error==='not-allowed'?'Microphone blocked: allow it in the browser address bar':'Voice error: '+e.error};rec.start()};
-
+// Voice: short listening rounds that restart automatically (more reliable in Edge and Chrome), a sound meter to show the microphone hears you, and clear messages.
+let wantRec=false,heard=false,meterStop=null;
+async function startMeter(){try{const st=await navigator.mediaDevices.getUserMedia({audio:true});const ac=new (window.AudioContext||window.webkitAudioContext)(),src=ac.createMediaStreamSource(st),an=ac.createAnalyser();an.fftSize=256;src.connect(an);const buf=new Uint8Array(an.frequencyBinCount);let on=true;
+ const tick=()=>{if(!on)return;an.getByteTimeDomainData(buf);let m=0;for(const v of buf)m=Math.max(m,Math.abs(v-128));if(m>12&&!heard)$('micState').textContent='Listening… sound detected, keep speaking';requestAnimationFrame(tick)};tick();
+ meterStop=()=>{on=false;st.getTracks().forEach(x=>x.stop());ac.close()}}catch(e){$('micState').textContent=e.name==='NotAllowedError'?'Microphone blocked: click the lock icon left of the address → Microphone → Allow, then refresh':'Microphone not found: check Windows sound input'}}
+function listen(){if(!wantRec)return;rec=new SR();rec.lang='en-GB';rec.continuous=false;rec.interimResults=true;const base=$('said').value?$('said').value.trim()+' ':'';
+ rec.onresult=e=>{heard=true;let fin='',inter='';for(let i=0;i<e.results.length;i++){if(e.results[i].isFinal)fin+=e.results[i][0].transcript;else inter+=e.results[i][0].transcript}$('said').value=base+fin+(inter?' '+inter:'')+(fin?'. ':'');$('micState').textContent='Listening… press the button again to stop'};
+ rec.onerror=e=>{const m={'not-allowed':'Microphone blocked: click the lock icon left of the address → Microphone → Allow, then refresh','service-not-allowed':'Speech service blocked in this browser: try Google Chrome, or use Windows + H','network':'Speech service not reachable (network): try Google Chrome, or use Windows + H','audio-capture':'No microphone found, or another app (Teams, Zoom) is using it','no-speech':''}[e.error];if(m===undefined)$('micState').textContent='Voice error: '+e.error;else if(m)$('micState').textContent=m;if(e.error!=='no-speech'){wantRec=false}};
+ rec.onend=()=>{if(wantRec){setTimeout(listen,150)}else stopUI()};try{rec.start()}catch(x){}}
+function stopUI(){recOn=false;$('mic').classList.remove('rec');if(meterStop){meterStop();meterStop=null}if(!heard&&!$('micState').textContent.startsWith('Microphone')&&!/Speech|No microphone|Voice error/.test($('micState').textContent))$('micState').textContent='No words were recognised. Try Google Chrome, check the microphone, or use Windows + H.';else if(heard)$('micState').textContent='';if($('said').value.trim())readDraft()}
+$('mic').onclick=()=>{if(!SR)return;if(recOn){wantRec=false;try{rec.stop()}catch(e){}return}recOn=true;wantRec=true;heard=false;$('mic').classList.add('rec');$('micState').textContent='Listening… speak now';startMeter();listen()};
 // plans spoken: "tomorrow: ...", "next week ...", "to do ...", "remind me ..."
 const PLANRX=/^\s*(today|tomorrow|this week|next week|this month|later|to ?do|remind me( to)?)\b[\s:,-]*/i;
 function parseAll(txt){const parts=txt.replace(/\b(next task|then|after that|also|and then|another task|moving on)\b/gi,'|').split(/[|.;\n]+/).map(s=>s.trim()).filter(s=>s.length>2);
@@ -182,20 +253,68 @@ function drawTodo(){const B={};S.todos.forEach(t=>{const k=bucketOf(t);(B[k]=B[k
 $('tdWhen').onchange=()=>$('tdDate').classList.toggle('hide',$('tdWhen').value!=='date');
 $('tdAdd').onclick=()=>{const tx=$('tdText').value.trim();if(!tx)return;const w=$('tdWhen').value;S.todos.push({id:uid(),text:tx,task:$('tdTask').value,plan:w==='date'?$('tdDate').value:planDate(w),done:false,doneDate:'',created:today()});$('tdText').value='';save();drawAll()};
 // ── voice vs email
-function drawCmp(){const dt=$('cDate').value||today(),L=S.log.filter(l=>l.date===dt),E=S.email.filter(e=>e.date===dt);
+function drawCmp(){const dt=$('cDate').value||today(),L=S.log.filter(l=>l.date===dt),E=(S.email||[]).filter(e=>e.date===dt).concat((S.wa||[]).filter(e=>e.date===dt));
  const byT={};E.forEach(e=>{const k=e.task||'';(byT[k]=byT[k]||[]).push(e)});const loggedT=new Set(L.map(l=>l.task));
  const conf=[...loggedT].filter(t=>byT[t]),noMail=[...loggedT].filter(t=>!byT[t]),mailOnly=Object.keys(byT).filter(t=>t&&!loggedT.has(t)),unm=byT['']||[];
- const emList=es=>es.slice(0,4).map(e=>`<div class="em">${e.dir==='sent'?'↗ to':'↙ from'} ${esc(e.who)} · <a href="${e.link}" target="_blank">${esc(e.subject||'(no subject)')}</a></div>`).join('')+(es.length>4?`<div class="em">… ${es.length-4} more</div>`:'');
- const mins=t=>L.filter(l=>l.task===t).reduce((s,l)=>s+l.mins,0);
- $('cmpBox').innerHTML=`<div class="card ok"><h3>✅ Logged and seen in email <span class="cnt">${conf.length}</span></h3>${conf.map(t=>`<div style="margin:6px 0"><b>${esc(t)}</b> · ${mins(t)} min logged · ${byT[t].length} email(s)${emList(byT[t])}</div>`).join('')||'<p class="small">None</p>'}</div>
- <div class="card add"><h3>➕ In email, not in your log <span class="cnt">${mailOnly.length+(unm.length?1:0)}</span></h3>${mailOnly.map(t=>`<div style="margin:6px 0"><b>${esc(t)}</b> · ${byT[t].length} email(s)${emList(byT[t])}<div style="margin-top:4px;display:flex;gap:6px;align-items:center"><input type="number" min="0" value="15" style="width:70px" id="m_${btoa(unescape(encodeURIComponent(t))).replace(/=/g,'')}"> min <button class="btn" data-add="${esc(t)}">Add to log</button></div></div>`).join('')}
- ${unm.length?`<div style="margin-top:10px"><b>Not linked to a task (${unm.length})</b>${unm.slice(0,8).map(e=>`<div class="em" style="display:flex;gap:6px;align-items:center;margin:4px 0"><span style="flex:1">${e.dir==='sent'?'↗':'↙'} ${esc(e.who)} · <a href="${e.link}" target="_blank">${esc(e.subject||'(no subject)')}</a></span><select data-link="${e.id}" style="max-width:150px;width:150px"><option value="">link to task…</option>${opts(S.tasks.filter(t=>taskInfo(t).status!=='Completed').map(t=>t.name))}</select></div>`).join('')}${unm.length>8?`<div class="em">… ${unm.length-8} more (newsletters and general emails can be ignored)</div>`:''}</div>`:''}
- ${!mailOnly.length&&!unm.length?'<p class="small">None</p>':''}</div>
- <div class="card info"><h3>ℹ️ Logged, no email that day <span class="cnt">${noMail.length}</span></h3><p class="small">Normal for calls, meetings, site visits and offline work.</p>${noMail.map(t=>`<div style="margin:4px 0">${esc(t)} · ${mins(t)} min</div>`).join('')||'<p class="small">None</p>'}</div>`;
- $('cmpBox').querySelectorAll('[data-add]').forEach(b=>b.onclick=()=>{const t=b.dataset.add,inp=$('m_'+btoa(unescape(encodeURIComponent(t))).replace(/=/g,''));S.log.push({id:uid(),date:dt,task:t,mins:+inp.value||0,done:false,remarks:'Added from emails',source:'email'});save();drawAll()});
- $('cmpBox').querySelectorAll('[data-link]').forEach(s=>s.onchange=()=>{if(!s.value)return;const e=S.email.find(x=>x.id===s.dataset.link);e.task=s.value;api('setEmailTask',e.id,s.value);drawCmp()})}
+ const one=e=>e.src==='wa'?`<div class="em"><span class="src w">CHAT</span>${esc(e.who)} in ${esc(e.chat)}: ${esc(e.text.slice(0,90))}</div>`:`<div class="em"><span class="src e">EMAIL</span>${e.dir==='sent'?'to':'from'} ${esc(e.who)} · <a href="${e.link}" target="_blank" rel="noopener">${esc(e.subject||'(no subject)')}</a></div>`;
+ const emList=es=>es.slice(0,4).map(one).join('')+(es.length>4?`<div class="em">and ${es.length-4} more</div>`:'');
+ const mins=t=>L.filter(l=>l.task===t).reduce((s,l)=>s+l.mins,0);const key=t=>btoa(unescape(encodeURIComponent(t))).replace(/[^a-z0-9]/gi,'');
+ $('cmpBox').innerHTML=`<div class="card ok"><h3>Logged and confirmed <span class="cnt">${conf.length}</span></h3>${conf.map(t=>`<div style="margin:8px 0"><b>${esc(t)}</b> <span class="small">${mins(t)} min</span>${emList(byT[t])}</div>`).join('')||'<p class="small">Nothing yet for this day.</p>'}</div>
+ <div class="card add"><h3>Seen, not logged <span class="cnt">${mailOnly.length+(unm.length?1:0)}</span></h3>${mailOnly.map(t=>`<div style="margin:8px 0"><b>${esc(t)}</b>${emList(byT[t])}<div style="margin-top:6px;display:flex;gap:6px;align-items:center"><input type="number" min="0" value="15" style="width:70px" id="m_${key(t)}"><span class="small">min</span><button class="btn" data-add="${esc(t)}">Add to log</button></div></div>`).join('')}
+ ${unm.length?`<div style="margin-top:12px"><b style="font-size:13px">Not linked to a task (${unm.length})</b>${unm.slice(0,8).map(e=>`<div style="display:flex;gap:6px;align-items:center;margin:5px 0"><div style="flex:1;min-width:0">${one(e)}</div><select data-link="${e.id}" style="max-width:150px;width:150px;font-size:12.5px;padding:5px 8px"><option value="">Link to task</option>${opts(S.tasks.filter(t=>taskInfo(t).status!=='Completed').map(t=>t.name))}</select></div>`).join('')}${unm.length>8?`<div class="em">and ${unm.length-8} more; newsletters and general messages can be ignored</div>`:''}</div>`:''}
+ ${!mailOnly.length&&!unm.length?'<p class="small">Nothing here: every email and chat is in your log.</p>':''}</div>
+ <div class="card info"><h3>Logged, no email or chat <span class="cnt">${noMail.length}</span></h3><p class="small" style="margin:0 0 6px">Normal for calls, meetings and site visits.</p>${noMail.map(t=>`<div style="margin:5px 0">${esc(t)} <span class="small">${mins(t)} min</span></div>`).join('')||'<p class="small">None</p>'}</div>`;
+ $('cmpBox').querySelectorAll('[data-add]').forEach(b=>b.onclick=()=>{const t=b.dataset.add,inp=$('m_'+key(t));S.log.push({id:uid(),date:dt,task:t,mins:+inp.value||0,done:false,remarks:'Added from emails and chats',source:'evidence'});save();drawAll()});
+ $('cmpBox').querySelectorAll('[data-link]').forEach(s=>s.onchange=()=>{if(!s.value)return;const e=(S.email||[]).concat(S.wa||[]).find(x=>x.id===s.dataset.link);if(e){e.task=s.value;save()}drawCmp()})}
 $('cDate').onchange=drawCmp;
-$('scan').onclick=()=>{$('scanMsg').textContent='Checking…';api('scanEmails',2).then(n=>api('getAll')).then(d=>{if(d){S.email=d.email}$('scanMsg').textContent='Done';drawAll()}).catch(e=>$('scanMsg').textContent='Could not check emails: '+(e&&e.message||e))};
+
+// ── evidence: Gmail (subject, contact, date only) and WhatsApp chat exports, matched to tasks by keywords
+const STOPW=['the','and','for','with','update','updates','coordination','renewal','issue','check','company','task','general','new','project','follow','meeting','call','email','emails'];
+const wordsOf=s=>String(s||'').toLowerCase().replace(/[^a-z0-9 ]/g,' ').split(/\s+/).filter(w=>w.length>2&&!STOPW.includes(w));
+function matchTask(text){const tx=' '+String(text||'').toLowerCase().replace(/[^a-z0-9@. ]/g,' ')+' ';let best='',score=0;
+ S.tasks.forEach(k=>{const kw=String(k.keywords||'').split(',').map(x=>x.trim().toLowerCase()).filter(Boolean);if(kw.some(x=>tx.includes(x))){if(score<2){score=2;best=k.name}return}
+  const w=wordsOf(k.name);if(!w.length)return;const hits=w.filter(x=>tx.includes(' '+x)).length,sc=hits/w.length;if((sc>=0.5||(hits>=1&&w.length===1))&&sc>score){score=sc;best=k.name}});return best}
+let GTOKEN=null,GEXP=0;
+async function gToken(){if(GTOKEN&&Date.now()<GEXP)return GTOKEN;const p=new firebase.auth.GoogleAuthProvider();p.addScope('https://www.googleapis.com/auth/gmail.metadata');p.setCustomParameters({login_hint:USER.email});
+ const r=await firebase.auth().currentUser.reauthenticateWithPopup(p);GTOKEN=r.credential.accessToken;GEXP=Date.now()+50*60e3;return GTOKEN}
+async function gGet(url){const r=await fetch(url,{headers:{Authorization:'Bearer '+GTOKEN}});if(r.status===401){GTOKEN=null;throw new Error('Gmail permission expired: click again')}if(r.status===403)throw new Error('Gmail access is not switched on for this app yet (see set-up step "Gmail")');if(!r.ok)throw new Error('Gmail error '+r.status);return r.json()}
+async function gmailSync(days){if(!FB_ON||!USER){$('scanMsg').textContent='Gmail connects in the live app after sign-in.';return}
+ $('scanMsg').textContent='Connecting to Gmail…';await gToken();const since=Date.now()-days*864e5,me=(USER.email||'').toLowerCase(),have=new Set(S.email.map(e=>e.id));let added=0;
+ for(const lab of ['INBOX','SENT']){let page='',stop=false,n=0;while(!stop&&n<4){n++;const L=await gGet('https://gmail.googleapis.com/gmail/v1/users/me/messages?labelIds='+lab+'&maxResults=50'+(page?'&pageToken='+page:''));const ids=(L.messages||[]).map(m=>m.id);
+  for(let i=0;i<ids.length;i+=8){const batch=await Promise.all(ids.slice(i,i+8).map(id=>gGet('https://gmail.googleapis.com/gmail/v1/users/me/messages/'+id+'?format=metadata&metadataHeaders=Subject&metadataHeaders=From&metadataHeaders=To')));
+   for(const m of batch){const at=+m.internalDate;if(at<since){stop=true;continue}if(have.has(m.id))continue;const H={};(m.payload&&m.payload.headers||[]).forEach(h=>H[h.name.toLowerCase()]=h.value);
+    const sent=lab==='SENT'||(H.from||'').toLowerCase().includes(me),who=String(sent?H.to:H.from||'').replace(/<[^>]*>/g,'').replace(/"/g,'').split(',')[0].trim().slice(0,80),subj=String(H.subject||'').slice(0,200);
+    if((m.labelIds||[]).some(x=>/CATEGORY_(PROMOTIONS|SOCIAL|FORUMS)/.test(x)))continue;
+    S.email.push({id:m.id,date:ds(new Date(at)),dir:sent?'sent':'received',who,subject:subj,task:matchTask(subj+' '+who+' '+(sent?H.to:H.from)),link:'https://mail.google.com/mail/u/0/#all/'+m.threadId,src:'email'});have.add(m.id);added++}}
+  page=L.nextPageToken||'';if(!page)stop=true}}
+ const cut=ds(new Date(Date.now()-120*864e5));S.email=S.email.filter(e=>e.date>=cut);save();$('scanMsg').textContent=added+' new email(s) read · '+new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});drawAll()}
+$('scan').onclick=()=>gmailSync(3).catch(e=>$('scanMsg').textContent=e.message||String(e));
+// WhatsApp: "Export chat → Without media" gives a .txt (Android) or .zip (iPhone)
+const WARX=/^\u200e?\[?(\d{1,2})[\/.](\d{1,2})[\/.](\d{2,4}),?\s+(\d{1,2}):(\d{2})(?::\d{2})?\s*([AaPp]\.?[Mm]\.?)?\]?\s*(?:-\s*)?([^:]{1,60}):\s?(.*)$/;
+function hash(s){let h=5381;for(let i=0;i<s.length;i++)h=((h<<5)+h+s.charCodeAt(i))|0;return 'w'+(h>>>0).toString(36)}
+function parseWA(txt,chat){const out=[];let cur=null;const since=ds(new Date(Date.now()-60*864e5));
+ txt.split(/\r?\n/).forEach(line=>{const m=WARX.exec(line);if(m){let [,d,mo,y,,,,who,msg]=m;y=y.length===2?'20'+y:y;const date=y+'-'+String(mo).padStart(2,'0')+'-'+String(d).padStart(2,'0');cur={date,who:who.trim().slice(0,60),text:msg};out.push(cur)}else if(cur&&line.trim())cur.text+=' '+line.trim()});
+ return out.filter(x=>x.date>=since&&!/^<(media omitted|attached)|deleted this message|messages and calls are end-to-end/i.test(x.text)).map(x=>({id:hash(chat+x.date+x.who+x.text),date:x.date,who:x.who,chat,text:x.text.slice(0,160),task:matchTask(x.text+' '+chat),src:'wa'}))}
+$('waFile').onchange=async e=>{const f=e.target.files[0];if(!f)return;try{let txt='';if(/\.zip$/i.test(f.name)){if(!window.JSZip)throw new Error('Zip reader not loaded: check the internet connection');const z=await JSZip.loadAsync(await f.arrayBuffer());const tf=Object.values(z.files).find(x=>/\.txt$/i.test(x.name));if(!tf)throw new Error('No chat text inside the zip');txt=await tf.async('string')}else txt=await f.text();
+ const chat=f.name.replace(/\.(txt|zip)$/i,'').replace(/^WhatsApp Chat( with| -)?\s*/i,'').trim()||'WhatsApp chat';const rows=parseWA(txt,chat),have=new Set(S.wa.map(x=>x.id));let n=0;rows.forEach(r=>{if(!have.has(r.id)){S.wa.push(r);n++}});save();drawAll();$('waMsg').textContent=n+' message(s) added from "'+chat+'" (last 60 days)'}catch(err){$('waMsg').textContent='Could not read the chat: '+err.message}e.target.value=''};
+// ── the day ribbon
+const PCOL=['#C9962E','#3E7CC4','#2E9A73','#D0684F','#7D63C9','#3A9BB3','#B65A93','#8C9A2E'];
+function drawRibbon(){const dt=$('logDate').value||today(),L=S.log.filter(l=>l.date===dt),tot=L.reduce((s,l)=>s+(+l.mins||0),0),goal=480,span=Math.max(goal,tot);
+ const proj={};S.projects.forEach((p,i)=>proj[p]=PCOL[i%PCOL.length]);const pj=n=>{const t=S.tasks.find(x=>x.name===n);return t?t.proj:'General'};
+ const segs=L.map(l=>`<i style="width:${(+l.mins||0)/span*100}%;background:${proj[pj(l.task)]||PCOL[0]}" title="${esc(l.task)} · ${l.mins} min"></i>`).join('');
+ const used=[...new Set(L.map(l=>pj(l.task)))];
+ const td=today(),planned=S.todos.filter(t=>t.plan&&t.plan<=dt&&(!t.done||t.doneDate===dt)&&!(t.done&&t.doneDate<dt)),done=planned.filter(t=>t.done).length,carried=S.todos.filter(t=>!t.done&&t.plan&&t.plan<dt).length,ev=(S.email||[]).filter(e=>e.date===dt).length+(S.wa||[]).filter(e=>e.date===dt).length;
+ const h=Math.floor(tot/60),m=tot%60;
+ $('ribbon').innerHTML=`<div class="rb-top"><div><div class="d">${new Date(dt+'T00:00:00').toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long'})}</div><div class="h">${h}h ${String(m).padStart(2,'0')}m<small>logged of an 8-hour day</small></div></div></div>
+ <div class="track">${segs}<span class="goal" style="left:${goal/span*100}%"></span></div><div class="scale"><span>0h</span><span>2h</span><span>4h</span><span>6h</span><span>${span>goal?Math.round(span/60)+'h':'8h'}</span></div>
+ ${used.length?`<div class="rb-legend">${used.map(p=>`<span><em style="background:${proj[p]||PCOL[0]}"></em>${esc(p)}</span>`).join('')}</div>`:''}
+ <div class="rb-plan"><span><b>${done}</b> of ${planned.length} planned done</span>${carried?`<span><b>${carried}</b> carried over</span>`:''}<span><b>${L.length}</b> entries</span>${SHOW_CHECK?`<span><b>${ev}</b> emails and chats</span>`:''}</div>`;
+ const hr=new Date().getHours(),nm=(USER&&USER.displayName||'').split(' ')[0];$('greet').textContent=(hr<12?'Good morning':hr<17?'Good afternoon':'Good evening')+(nm?', '+nm:'');$('dayLbl2').textContent='Plan, speak, and the log keeps itself.'}
+if(!SHOW_CHECK){document.querySelector('#nav button[data-t=cmp]').classList.add('hide');$('rbEv')&&0}
+const fabVis=()=>$('fab').classList.toggle('hide',!document.querySelector('#t-today').classList.contains('hide'));document.querySelectorAll('#nav button').forEach(b=>b.addEventListener('click',()=>setTimeout(fabVis,0)));setTimeout(fabVis,0);
+$('fab').onclick=()=>{document.querySelector('#nav button[data-t=today]').click();window.scrollTo({top:0,behavior:'smooth'});setTimeout(()=>$('mic').click(),250)};
+new MutationObserver(()=>{$('savedM').textContent=$('saved').textContent;$('whoM').textContent=$('who').textContent}).observe(document.querySelector('.me'),{subtree:true,childList:true,characterData:true});
+
 // ── views
 const tInfo=name=>{const t=S.tasks.find(x=>x.name===name)||{};return t};
 function drawToday(){const dt=$('logDate').value||today();$('dayLbl').textContent=new Date(dt+'T00:00:00').toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long'});
@@ -218,10 +337,10 @@ function drawDash(){const t=today(),ws=new Date(weekStart()+'T00:00:00'),wsS=ds(
  $('byP').innerHTML=grp('proj',S.projects);$('byD').innerHTML=grp('dept',S.depts)}
 function drawLog(){const f=$('lf').value,t=$('lt').value,q=norm($('lq').value);const L=S.log.filter(l=>(!f||l.date>=f)&&(!t||l.date<=t)&&(!q||norm(l.task+' '+l.remarks).includes(q))).sort((a,b)=>a.date<b.date?1:-1);
  $('logTbl').innerHTML='<div style="overflow:auto;max-height:560px"><table><tr><th>Date</th><th>Task</th><th>Project</th><th>Department</th><th class="r">Mins</th><th>Finished?</th><th>Remarks</th></tr>'+L.map(l=>{const tk=tInfo(l.task);return `<tr><td>${fmtD(l.date)}</td><td>${esc(l.task)}</td><td>${esc(tk.proj||'')}</td><td>${esc(tk.dept||'')}</td><td class="r">${l.mins}</td><td>${l.done?'Yes':'No'}</td><td>${esc(l.remarks)}</td></tr>`}).join('')+'</table></div>'}
-function drawAll(){drawToday();drawTasks();drawDash();drawLog();drawTodo();drawCmp()}
+function drawAll(){drawToday();drawTasks();drawDash();drawLog();drawTodo();drawCmp();drawRibbon()}
 $('addTask').onclick=()=>{const n=$('nTask').value.trim();if(!n)return;if(S.tasks.find(t=>norm(t.name)===norm(n))){alert('This task already exists');return}S.tasks.push({name:n,proj:$('nProj').value,dept:$('nDept').value,due:$('nDue').value,keywords:''});$('nTask').value='';save();drawAll()};
 $('addP').onclick=()=>{const n=$('nP').value.trim();if(n&&!S.projects.includes(n)){S.projects.push(n);save();drawAll()}$('nP').value=''};$('addD').onclick=()=>{const n=$('nD').value.trim();if(n&&!S.depts.includes(n)){S.depts.push(n);save();drawAll()}$('nD').value=''};
-['tq','tst'].forEach(i=>$(i).oninput=drawTasks);['lf','lt','lq'].forEach(i=>$(i).oninput=drawLog);$('logDate').onchange=drawToday;
+['tq','tst'].forEach(i=>$(i).oninput=drawTasks);['lf','lt','lq'].forEach(i=>$(i).oninput=drawLog);$('logDate').onchange=()=>{drawToday();drawRibbon()};
 document.querySelectorAll('#nav button').forEach(b=>b.onclick=()=>{document.querySelectorAll('#nav button').forEach(x=>x.classList.toggle('on',x===b));document.querySelectorAll('main>section').forEach(s=>s.classList.toggle('hide',s.id!=='t-'+b.dataset.t))});
 // ── import her Excel
 const xd=v=>{if(v==null||v==='')return '';if(typeof v==='number')return new Date(Date.UTC(1899,11,30)+Math.round(v)*864e5).toISOString().slice(0,10);if(v instanceof Date)return ds(v);const m=/(\d{4})-(\d{2})-(\d{2})/.exec(String(v));return m?m[0]:''};
@@ -243,13 +362,13 @@ $('exp').onclick=()=>{if(!window.XLSX){alert('Excel writer not loaded: check the
  [['Dashboard',db],['Daily Log',dl],['Task List',tl],['To-do',[['To-do','Task','Planned for','Done','Done on']].concat(S.todos.map(t=>[t.text,t.task,t.plan,t.done?'Yes':'No',t.doneDate]))],['Project Summary',sum('proj',S.projects,'Project')],['Department Summary',sum('dept',S.depts,'Department')]].forEach(([n,a])=>{const ws=XLSX.utils.aoa_to_sheet(a);ws['!cols']=a[0].map((_,i)=>({wch:i===0?34:i===8?50:16}));XLSX.utils.book_append_sheet(wb,ws,n)});
  XLSX.writeFile(wb,'Daily-Task-Tracker-'+t+'.xlsx')};
 // ── app-only stage: email comparison appears once the app runs in Google with Gmail connected
-{const b=document.querySelector('#nav button[data-t=cmp]');b.style.display='none';
+{
  $('t-data').insertAdjacentHTML('beforeend','<div class="card"><h2>Backup</h2><p class="note">Download a copy of all your data (tasks, log, to-dos, projects, departments). The same file restores it here or in any future version of the app, without loss.</p><button class="btn" id="bk2">Download backup</button> <input type="file" id="rs2" accept=".json"> <span class="small" id="rs2Msg"></span></div>');
  $('bk2').onclick=()=>{const {email,me,sheetUrl,...data}=S;const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(data)],{type:'application/json'}));a.download='Task-Tracker-backup-'+today()+'.json';a.click()};
  $('rs2').onchange=async e=>{const f=e.target.files[0];if(!f)return;try{const x=JSON.parse(await f.text());if(!x.tasks||!x.log)throw 0;if(confirm('Replace the data in this browser with the backup?')){S={...S,...x};save();drawAll();$('rs2Msg').textContent='Restored.'}}catch(err){$('rs2Msg').textContent='Not a valid backup file'}e.target.value=''};
- document.querySelector('#t-data .card:nth-of-type(3)').style.display='none';
+ 
  document.querySelector('footer').textContent=FB_ON?'Your data is stored securely in the company database; only you can see it. Download a backup now and then.':'Demo mode: data kept in this browser only.';
- document.querySelector('.hd .s').textContent='Plan · speak · log';}
+ }
 // ── start
 $('logDate').value=today();$('cDate').value=today();
 function boot(){api('getAll').then(d=>{if(d&&Object.keys(d).length){S={...S,...d,projects:d.projects&&d.projects.length?d.projects:S.projects,depts:d.depts&&d.depts.length?d.depts:S.depts}}S.tasks.forEach(t=>{if(!t.id)t.id=uid()});$('saved').textContent='Ready';drawAll()}).catch(e=>{$('saved').textContent='Could not load: '+(e&&e.message||e);drawAll()})}
